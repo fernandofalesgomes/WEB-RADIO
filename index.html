@@ -29,23 +29,61 @@
             width: 100%;
             margin-top: 15px;
         }
+        #current-song {
+            font-weight: bold;
+            color: #555;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
     <div class="player-container">
-        <h1>Minha Web Rádio - ao vivo</h1>
+        <h1>Minha Web Rádio</h1>
         
         <p>
-            Clique no botão de play para ouvir a nossa programação.
+            Tocando agora:
+            <span id="current-song">Carregando...</span>
         </p>
 
-        <audio controls autoplay loop>
-            <source src="musica1.mp3" type="audio/mpeg">
-            Seu navegador não suporta o elemento de áudio.
-        </audio>
+        <audio id="audioPlayer" controls autoplay></audio>
 
     </div>
+
+    <script>
+        // ESTA É A LISTA DE MÚSICAS.
+        // TROQUE OS NOMES DOS ARQUIVOS PELOS NOMES DOS SEUS ARQUIVOS MP3.
+        const playlist = [
+            'musica1.mp3',
+            'musica2.mp3',
+            'musica3.mp3'
+        ];
+
+        let currentSongIndex = 0;
+        const audioPlayer = document.getElementById('audioPlayer');
+        const currentSongDisplay = document.getElementById('current-song');
+
+        function playSong(index) {
+            const songName = playlist[index];
+            audioPlayer.src = songName;
+            currentSongDisplay.textContent = songName.replace('.mp3', '');
+            audioPlayer.play();
+        }
+
+        // Toca a próxima música quando a atual termina
+        audioPlayer.addEventListener('ended', () => {
+            currentSongIndex++;
+            if (currentSongIndex >= playlist.length) {
+                currentSongIndex = 0; // Volta para a primeira música
+            }
+            playSong(currentSongIndex);
+        });
+
+        // Inicia a primeira música
+        window.addEventListener('DOMContentLoaded', () => {
+            playSong(currentSongIndex);
+        });
+    </script>
 
 </body>
 </html>
