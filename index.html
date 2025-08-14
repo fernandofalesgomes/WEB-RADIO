@@ -4,85 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minha Web Rádio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
-            flex-direction: column;
+            font-family: 'Inter', sans-serif;
         }
-        .player-container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-        }
-        audio {
-            width: 100%;
-            margin-top: 15px;
-        }
-        #current-song {
-            font-weight: bold;
-            color: #555;
-            margin-top: 10px;
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
 
-    <div class="player-container">
-        <h1>Minha Web Rádio</h1>
+    <div class="bg-gray-800 p-8 md:p-12 rounded-2xl shadow-2xl max-w-lg w-full text-center border border-gray-700">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-shadow">Minha Web Rádio</h1>
         
-        <p>
-            Tocando agora:
-            <span id="current-song">Carregando...</span>
-        </p>
-
-        <audio id="audioPlayer" controls autoplay></audio>
-
+        <p class="text-xl text-gray-300 mb-6">Tocando agora:</p>
+        
+        <div id="current-song-container" class="bg-gray-700 p-4 rounded-xl mb-8 border border-gray-600">
+            <span id="current-song" class="text-2xl md:text-3xl font-bold text-green-400">Carregando...</span>
+        </div>
+        
+        <audio id="audioPlayer" controls autoplay class="w-full"></audio>
     </div>
 
     <script>
-        // ESTA É A LISTA DE MÚSICAS.
-        // TROQUE OS NOMES DOS ARQUIVOS PELOS NOMES DOS SEUS ARQUIVOS MP3.
+        // O CÓDIGO JAVASCRIPT QUE VAI FAZER A MÁGICA ACONTECER!
+        // ------------------------------------------------------------------
+
+        // PASSO 1: Crie uma lista com os nomes dos seus arquivos MP3.
+        // É aqui que você precisa configurar!
+        // Certifique-se de que os nomes estão exatamente como no seu repositório.
         const playlist = [
             'musica1.mp3',
             'musica2.mp3',
-            'musica3.mp3'
+            'musica3.mp3',
+            // Adicione ou remova músicas aqui!
+            // Exemplo: 'minha-musica-favorita.mp3',
+            //         'podcast-episodio1.mp3',
         ];
 
         let currentSongIndex = 0;
         const audioPlayer = document.getElementById('audioPlayer');
         const currentSongDisplay = document.getElementById('current-song');
 
+        // Função para tocar uma música específica da lista
         function playSong(index) {
+            if (playlist.length === 0) {
+                currentSongDisplay.textContent = 'Nenhuma música na playlist!';
+                return;
+            }
+            // Pega o nome do arquivo da lista
             const songName = playlist[index];
+            // Define o arquivo como a fonte do player
             audioPlayer.src = songName;
+            // Atualiza o texto na tela para mostrar o nome da música
             currentSongDisplay.textContent = songName.replace('.mp3', '');
+            // Inicia a música
             audioPlayer.play();
         }
 
-        // Toca a próxima música quando a atual termina
+        // Evento que escuta quando uma música termina
         audioPlayer.addEventListener('ended', () => {
+            console.log('Música terminada. Tocando a próxima...');
+            // Avança para a próxima música na lista
             currentSongIndex++;
+            // Se chegou ao fim da lista, volta para a primeira música
             if (currentSongIndex >= playlist.length) {
-                currentSongIndex = 0; // Volta para a primeira música
+                currentSongIndex = 0;
             }
             playSong(currentSongIndex);
         });
 
-        // Inicia a primeira música
+        // Evento que garante que a primeira música comece a tocar
         window.addEventListener('DOMContentLoaded', () => {
+            console.log('Página carregada. Iniciando player...');
             playSong(currentSongIndex);
         });
+        
     </script>
 
 </body>
