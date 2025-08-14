@@ -35,16 +35,14 @@
         // O CÓDIGO JAVASCRIPT QUE VAI FAZER A MÁGICA ACONTECER!
         // ------------------------------------------------------------------
 
-        // PASSO 1: Crie uma lista com os nomes dos seus arquivos MP3.
+        // PASSO 1: Crie uma lista com os nomes e os links diretos dos seus arquivos.
         // É aqui que você precisa configurar!
-        // Certifique-se de que os nomes estão exatamente como no seu repositório.
+        // Copie o link 'Raw' de cada um dos seus novos arquivos no GitHub.
         const playlist = [
-            'musica1.mp3',
-            'musica2.mp3',
-            'musica3.mp3',
+            { name: 'Música do Verão (NOVA)', url: 'https://raw.githubusercontent.com/seu-usuario/seu-repositorio/main/nome-do-novo-arquivo1.mp3' },
+            { name: 'Rock Clássico (NOVO)', url: 'https://raw.githubusercontent.com/seu-usuario/seu-repositorio/main/nome-do-novo-arquivo2.mp3' },
+            { name: 'Balada Romântica (NOVA)', url: 'https://raw.githubusercontent.com/seu-usuario/seu-repositorio/main/nome-do-novo-arquivo3.mp3' },
             // Adicione ou remova músicas aqui!
-            // Exemplo: 'minha-musica-favorita.mp3',
-            //         'podcast-episodio1.mp3',
         ];
 
         let currentSongIndex = 0;
@@ -57,12 +55,12 @@
                 currentSongDisplay.textContent = 'Nenhuma música na playlist!';
                 return;
             }
-            // Pega o nome do arquivo da lista
-            const songName = playlist[index];
+            // Pega o objeto da música da lista
+            const song = playlist[index];
             // Define o arquivo como a fonte do player
-            audioPlayer.src = songName;
+            audioPlayer.src = song.url;
             // Atualiza o texto na tela para mostrar o nome da música
-            currentSongDisplay.textContent = songName.replace('.mp3', '');
+            currentSongDisplay.textContent = song.name;
             // Inicia a música
             audioPlayer.play();
         }
