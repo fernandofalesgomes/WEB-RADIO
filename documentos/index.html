@@ -1,1 +1,45 @@
 
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Web Rádio AAC</title>
+</head>
+<body>
+  <h2>Minha Mini Web Rádio</h2>
+
+  <audio id="player" controls autoplay>
+    <source src="musica1.m4a" type="audio/mp4">
+    Seu navegador não suporta áudio.
+  </audio>
+
+  <ul id="playlist">
+    <li data-src="musica1.m4a">Música 1</li>
+    <li data-src="musica2.m4a">Música 2</li>
+    <li data-src="musica3.m4a">Música 3</li>
+  </ul>
+
+  <script>
+    const player = document.getElementById('player');
+    const playlist = document.getElementById('playlist').children;
+    let current = 0;
+
+    function playTrack(index) {
+      current = index;
+      player.src = playlist[index].dataset.src;
+      player.play();
+    }
+
+    player.addEventListener('ended', () => {
+      current++;
+      if(current >= playlist.length) current = 0;
+      playTrack(current);
+    });
+
+    for(let i = 0; i < playlist.length; i++) {
+      playlist[i].addEventListener('click', () => playTrack(i));
+    }
+  </script>
+</body>
+</html>
