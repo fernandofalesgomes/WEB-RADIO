@@ -24,6 +24,7 @@
     const player = document.getElementById('player');
     const playlistElement = document.getElementById('playlist');
     let tracks = [];
+    let trackNames = [];
     let current = 0;
 
     // Configuração do seu repositório
@@ -31,22 +32,22 @@
     const repo = "WEB-RADIO";          // nome do repositório
     const pasta = "";                 // pasta dentro do repo, se estiver na raiz deixa ""
 
-    // URL da API do GitHub para listar arquivos
     const apiURL = `https://api.github.com/repos/${usuario}/${repo}/contents/${pasta}`;
 
     fetch(apiURL)
       .then(response => response.json())
       .then(data => {
         // Filtra apenas arquivos .m4a
-        tracks = data.filter(item => item.name.endsWith(".m4a"))
-                     .map(item => item.download_url);
+        const arquivos = data.filter(item => item.name.endsWith(".m4a"));
+        tracks = arquivos.map(item => item.download_url);
+        trackNames = arquivos.map(item => item.name.replace(/_/g, " ").replace(".m4a", ""));
 
         if(tracks.length === 0) return;
 
         // Cria lista no HTML
-        tracks.forEach((track, i) => {
+        trackNames.forEach((name, i) => {
           const li = document.createElement("li");
-          li.textContent = track.split("/").pop();
+          li.textContent = name;
           li.addEventListener("click", () => playTrack(i));
           playlistElement.appendChild(li);
         });
@@ -61,9 +62,9 @@
       player.play();
     }
 
+    // Avança para próxima música automaticamente e faz loop
     player.addEventListener('ended', () => {
-      current++;
-      if(current >= tracks.length) current = 0;
+      current = (current + 1) % tracks.length;
       playTrack(current);
     });
   </script>
