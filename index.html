@@ -2,14 +2,13 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Web Rádio Mobile-Friendly</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Rádio Profissional</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: Arial, sans-serif;
-      overflow-x: hidden;
-      min-height: 100vh;
+      overflow: hidden;
+      height: 100vh;
       background: linear-gradient(-45deg, #1e3c72, #2a5298, #6dd5ed, #2193b0);
       background-size: 400% 400%;
       animation: gradientBG 15s ease infinite;
@@ -26,90 +25,86 @@
 
     header {
       text-align: center;
-      padding: 15px;
+      padding: 20px;
       flex: 0 0 auto;
     }
 
     header img {
-      max-height: 60px;
-    }
-
-    header h1 {
-      font-size: 1.8em;
-      margin-top: 10px;
+      max-height: 80px;
     }
 
     main {
       display: flex;
       flex: 1 1 auto;
-      flex-direction: column-reverse; /* Playlist abaixo no mobile */
-      padding: 10px;
-    }
-
-    #player-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    #player {
-      width: 100%;
-      max-width: 500px;
-      outline: none;
-    }
-
-    #controls {
-      margin-top: 8px;
-    }
-
-    button {
-      padding: 6px 10px;
-      margin: 0 3px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-      transition: background 0.3s;
-      font-size: 0.9em;
-    }
-
-    button:hover {
-      background: rgba(255,255,255,0.4);
+      overflow: hidden;
     }
 
     #playlist {
       list-style: none;
-      max-height: 250px;
+      padding: 10px;
+      width: 250px;
       overflow-y: auto;
-      margin-top: 10px;
       background: rgba(0,0,0,0.3);
-      border-radius: 8px;
-      padding: 5px;
     }
 
     #playlist li {
-      padding: 8px;
-      margin-bottom: 3px;
+      padding: 10px;
+      margin-bottom: 5px;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 5px;
       transition: background 0.3s;
     }
 
     #playlist li:hover { background: rgba(255,255,255,0.2); }
     #playlist li.active { background: rgba(255,255,255,0.4); font-weight: bold; }
 
-    #time { margin-top: 5px; font-weight: bold; }
+    #player-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #player {
+      width: 80%;
+      max-width: 600px;
+      outline: none;
+    }
+
+    #controls {
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 8px 12px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: rgba(255,255,255,0.4);
+    }
+
+    #time { margin-top: 10px; font-weight: bold; }
   </style>
 </head>
 <body>
   <header>
+    <!-- Coloque aqui o logotipo da sua rádio -->
     <img src="logo.png" alt="Minha Web Rádio">
-    <h1>Minha Web Rádio Mobile</h1>
+    <h1>Minha Web Rádio Profissional</h1>
   </header>
 
   <main>
+    <ul id="playlist"></ul>
+
     <div id="player-container">
       <audio id="player" controls autoplay></audio>
       <div id="controls">
@@ -118,8 +113,6 @@
       </div>
       <div id="time">00:00 / 00:00</div>
     </div>
-
-    <ul id="playlist"></ul>
   </main>
 
   <script>
@@ -137,7 +130,7 @@
 
     const usuario = "fernandofalesgomes"; // seu usuário GitHub
     const repo = "WEB-RADIO";   // seu repositório
-    const pasta = "documentos";          // pasta dentro do repo
+    const pasta = "documentos";          // pasta dentro do repo, "" se estiver na raiz
     const apiURL = `https://api.github.com/repos/${usuario}/${repo}/contents/${pasta}`;
 
     fetch(apiURL)
@@ -211,4 +204,3 @@
   </script>
 </body>
 </html>
-
