@@ -3,19 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>Mini Web Rádio AAC</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background: #f0f0f0; }
+    h2 { color: #333; }
+    ul { list-style: none; padding: 0; }
+    li { cursor: pointer; padding: 5px; margin: 5px 0; background: #fff; border-radius: 5px; }
+    li:hover { background: #ddd; }
+  </style>
 </head>
 <body>
   <h2>Minha Mini Web Rádio</h2>
 
   <audio id="player" controls autoplay>
-    <source src="musica1.m4a" type="audio/mp4">
+    <source src="https://raw.githubusercontent.com/usuario/meu-repo/main/musica1.m4a" type="audio/mp4">
     Seu navegador não suporta áudio.
   </audio>
 
   <ul id="playlist">
-    <li data-src="00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac">Música 1</li>
-    <li data-src="musica2.mp3">Música 2</li>
-    <li data-src="musica3.m4a">Música 3</li>
+    <li data-src="https://raw.githubusercontent.com/usuario/meu-repo/main/musica1.m4a">Música 1</li>
+    <li data-src="https://raw.githubusercontent.com/usuario/meu-repo/main/musica2.m4a">Música 2</li>
+    <li data-src="https://raw.githubusercontent.com/usuario/meu-repo/main/musica3.m4a">Música 3</li>
   </ul>
 
   <script>
@@ -41,10 +48,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
