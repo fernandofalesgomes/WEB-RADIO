@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Rádio AAC Automática</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #1e3c72, #2a5298);
+      color: #fff;
+      text-align: center;
+      padding: 50px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px #000;
+    }
+
+    #player {
+      width: 80%;
+      max-width: 600px;
+      margin: 20px auto;
+      display: block;
+      outline: none;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 600px;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    li {
+      cursor: pointer;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      transition: background 0.3s;
+    }
+
+    li:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    li.active {
+      background: rgba(255,255,255,0.4);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Minha Web Rádio</h1>
+  <audio id="player" controls autoplay>
+    Seu navegador não suporta áudio.
+  </audio>
+
+  <ul id="playlist"></ul>
+
+  <script>
+    const player = document.getElementById('player');
+    const playlistElement = document.getElementById('playlist');
+    let tracks = [];
+    let trackNames = [];
+    let current = 0;
+
+    // Configuração do repositório
+    const usuario = "fernandofalesgomes";        // seu usuário GitHub
+    const repo = "WEB-RADIO";          // nome do repositório
+    const pasta = "documentos";                 // pasta dentro do repo, deixe "" se estiver na raiz
+
+    const apiURL = `https://api.github.com/repos/${usuario}/${repo}/contents/${pasta}`;
+
+    fetch(apiURL)
+      .then(response => response.json())
+      .then(data => {
+        const arquivos = data.filter(item => item.name.endsWith(".m4a"));
+        tracks = arquivos.map(item => item.download_url);
+        trackNames = arquivos.map(item => item.name.replace(/_/g, " ").replace(".m4a", ""));
+
+        if(tracks.length === 0) return;
+
+        trackNames.forEach((name, i) => {
+          const li = document.createElement("li");
+          li.textContent = name;
+          li.addEventListener("click", () => playTrack(i));
+          playlistElement.appendChild(li);
+        });
+
+        playTrack(0);
+      });
+
+    function playTrack(index) {
+      current = index;
+      player.src = tracks[index];
+      player.play();
+      updateActiveTrack();
+    }
+
+    function updateActiveTrack() {
+      const items = playlistElement.querySelectorAll("li");
+      items.forEach((li, i) => li.classList.toggle("active", i === current));
+    }
+
+    player.addEventListener('ended', () => {
+      current = (current + 1) % tracks.length;
+      playTrack(current);
+    });
+  </script>
+</body>
+</html>
+
