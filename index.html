@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Rádio Mobile-Friendly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background: linear-gradient(-45deg, #1e3c72, #2a5298, #6dd5ed, #2193b0);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position:0% 50%;}
+      50% {background-position:100% 50%;}
+      100% {background-position:0% 50%;}
+    }
+
+    header {
+      text-align: center;
+      padding: 15px;
+      flex: 0 0 auto;
+    }
+
+    header img {
+      max-height: 60px;
+    }
+
+    header h1 {
+      font-size: 1.8em;
+      margin-top: 10px;
+    }
+
+    main {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column-reverse; /* Playlist abaixo no mobile */
+      padding: 10px;
+    }
+
+    #player-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    #player {
+      width: 100%;
+      max-width: 500px;
+      outline: none;
+    }
+
+    #controls {
+      margin-top: 8px;
+    }
+
+    button {
+      padding: 6px 10px;
+      margin: 0 3px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      transition: background 0.3s;
+      font-size: 0.9em;
+    }
+
+    button:hover {
+      background: rgba(255,255,255,0.4);
+    }
+
+    #playlist {
+      list-style: none;
+      max-height: 250px;
+      overflow-y: auto;
+      margin-top: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 5px;
+    }
+
+    #playlist li {
+      padding: 8px;
+      margin-bottom: 3px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+
+    #playlist li:hover { background: rgba(255,255,255,0.2); }
+    #playlist li.active { background: rgba(255,255,255,0.4); font-weight: bold; }
+
+    #time { margin-top: 5px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="Minha Web Rádio">
+    <h1>Minha Web Rádio Mobile</h1>
+  </header>
+
+  <main>
+    <div id="player-container">
+      <audio id="player" controls autoplay></audio>
+      <div id="controls">
+        <button id="shuffleBtn">Shuffle</button>
+        <button id="repeatBtn">Repeat</button>
+      </div>
+      <div id="time">00:00 / 00:00</div>
+    </div>
+
+    <ul id="playlist"></ul>
+  </main>
+
+  <script>
+    const player = document.getElementById('player');
+    const playlistElement = document.getElementById('playlist');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const repeatBtn = document.getElementById('repeatBtn');
+    const timeDisplay = document.getElementById('time');
+
+    let tracks = [];
+    let trackNames = [];
+    let current = 0;
+    let shuffle = false;
+    let repeat = true;
+
+    const usuario = "usuario"; // seu usuário GitHub
+    const repo = "meu-repo";   // seu repositório
+    const pasta = "";          // pasta dentro do repo
+    const apiURL = `https://api.github.com/repos/${usuario}/${repo}/contents/${pasta}`;
+
+    fetch(apiURL)
+      .then(resp => resp.json())
+      .then(data => {
+        const arquivos = data.filter(item => item.name.endsWith(".m4a"));
+        tracks = arquivos.map(item => item.download_url);
+        trackNames = arquivos.map(item => item.name.replace(/_/g," ").replace(".m4a",""));
+
+        if(tracks.length === 0) return;
+
+        trackNames.forEach((name,i)=>{
+          const li = document.createElement("li");
+          li.textContent = name;
+          li.addEventListener("click",()=>playTrack(i));
+          playlistElement.appendChild(li);
+        });
+
+        playTrack(0);
+      });
+
+    function playTrack(index){
+      current = index;
+      player.src = tracks[index];
+      player.play();
+      updateActiveTrack();
+    }
+
+    function updateActiveTrack(){
+      const items = playlistElement.querySelectorAll("li");
+      items.forEach((li,i)=>li.classList.toggle("active", i===current));
+    }
+
+    function nextTrack(){
+      if(shuffle){
+        current = Math.floor(Math.random()*tracks.length);
+      } else {
+        current++;
+        if(current>=tracks.length){
+          if(repeat) current=0;
+          else return;
+        }
+      }
+      playTrack(current);
+    }
+
+    player.addEventListener('ended', nextTrack);
+
+    shuffleBtn.addEventListener('click', ()=>{
+      shuffle = !shuffle;
+      shuffleBtn.style.background = shuffle ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.2)";
+    });
+
+    repeatBtn.addEventListener('click', ()=>{
+      repeat = !repeat;
+      repeatBtn.style.background = repeat ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.2)";
+    });
+
+    player.addEventListener('timeupdate', ()=>{
+      let cur = formatTime(player.currentTime);
+      let dur = formatTime(player.duration);
+      timeDisplay.textContent = `${cur} / ${dur}`;
+    });
+
+    function formatTime(sec){
+      if(isNaN(sec)) return "00:00";
+      let m = Math.floor(sec/60);
+      let s = Math.floor(sec%60);
+      return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+  </script>
+</body>
+</html>
