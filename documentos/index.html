@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Web Rádio AAC</title>
+  <title>Mini Web Rádio AAC Automática</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background: #f0f0f0; }
     h2 { color: #333; }
@@ -15,36 +15,57 @@
   <h2>Minha Mini Web Rádio</h2>
 
   <audio id="player" controls autoplay>
-    <source src="https://raw.githubusercontent.com/usuario/meu-repo/main/musica1.m4a" type="audio/mp4">
     Seu navegador não suporta áudio.
   </audio>
 
-  <ul id="playlist">
-    <li data-src="https://raw.githubusercontent.com/usuario/meu-repo/main/musica1.m4a">Música 1</li>
-    <li data-src="https://raw.githubusercontent.com/usuario/meu-repo/main/musica2.m4a">Música 2</li>
-    <li data-src="https://raw.githubusercontent.com/usuario/meu-repo/main/musica3.m4a">Música 3</li>
-  </ul>
+  <ul id="playlist"></ul>
 
   <script>
     const player = document.getElementById('player');
-    const playlist = document.getElementById('playlist').children;
+    const playlistElement = document.getElementById('playlist');
+    let tracks = [];
     let current = 0;
+
+    // Configuração do seu repositório
+    const usuario = "fernandofalesgomes";        // seu usuário GitHub
+    const repo = "WEB-RADIO";          // nome do repositório
+    const pasta = "";                 // pasta dentro do repo, se estiver na raiz deixa ""
+
+    // URL da API do GitHub para listar arquivos
+    const apiURL = `https://api.github.com/repos/${usuario}/${repo}/contents/${pasta}`;
+
+    fetch(apiURL)
+      .then(response => response.json())
+      .then(data => {
+        // Filtra apenas arquivos .m4a
+        tracks = data.filter(item => item.name.endsWith(".m4a"))
+                     .map(item => item.download_url);
+
+        if(tracks.length === 0) return;
+
+        // Cria lista no HTML
+        tracks.forEach((track, i) => {
+          const li = document.createElement("li");
+          li.textContent = track.split("/").pop();
+          li.addEventListener("click", () => playTrack(i));
+          playlistElement.appendChild(li);
+        });
+
+        // Começa a tocar a primeira música
+        playTrack(0);
+      });
 
     function playTrack(index) {
       current = index;
-      player.src = playlist[index].dataset.src;
+      player.src = tracks[index];
       player.play();
     }
 
     player.addEventListener('ended', () => {
       current++;
-      if(current >= playlist.length) current = 0;
+      if(current >= tracks.length) current = 0;
       playTrack(current);
     });
-
-    for(let i = 0; i < playlist.length; i++) {
-      playlist[i].addEventListener('click', () => playTrack(i));
-    }
   </script>
 </body>
 </html>
