@@ -1,38 +1,54 @@
-<audio id="player" controls></audio>
-
-<script>
-  async function carregarPlaylist() {
-    try {
-      // força sempre buscar versão nova do JSON
-      const url = "playlist.json?v=" + new Date().getTime();
-      const resposta = await fetch(url);
-      const playlist = await resposta.json();
-      console.log("Playlist carregada:", playlist);
-      tocarPlaylist(playlist);
-    } catch (e) {
-      console.error("Erro ao carregar playlist:", e);
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Rádio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 30px;
     }
-  }
+    audio {
+      margin-top: 20px;
+      width: 80%;
+    }
+    #current {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎶 Minha Web Rádio</h1>
+  <p id="current">Carregando playlist...</p>
+  <audio id="player" controls autoplay></audio>
 
-  function tocarPlaylist(playlist) {
+  <script>
+    let playlist = [];
     let index = 0;
     const audio = document.getElementById("player");
+    const current = document.getElementById("current");
 
-    function tocarMusica() {
-      audio.src = playlist[index].url;
-      audio.play();
-    }
+    // Carrega o arquivo playlist.json
+    fetch("playlist.json")
+      .then(response => response.json())
+      .then(data => {
+        playlist = data;
+        if (playlist.length > 0) {
+          playSong(0);
+        } else {
+          current.innerText = "Nenhuma música na playlist.";
+        }
+      })
+      .catch(err => {
+        current.innerText = "Erro ao carregar playlist!";
+        console.error(err);
+      });
 
-    tocarMusica();
-
-    audio.onended = function () {
-      index++;
-      if (index >= playlist.length) {
-        index = 0; // volta para a primeira música
-      }
-      tocarMusica();
-    };
-  }
-
-  carregarPlaylist();
-</script>
+    // Função para tocar uma música
+    function play
