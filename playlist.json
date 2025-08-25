@@ -1,6 +1,5 @@
 [
-  { "title": "Música 1", "src": "https://github.com/fernandofalesgomes/WEB-RADIO/raw/refs/heads/main/musica1.mp3" },
+  { "title": "Música 1", "src": "musica1.mp3" },
   { "title": "Música 2", "src": "musica2.mp3" },
   { "title": "Música 3", "src": "musica3.mp3" }
 ]
-
