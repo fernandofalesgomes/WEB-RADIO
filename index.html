@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Web Rádio Comércio</title>
+  <title>Web Rádio</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -51,5 +51,19 @@
       });
 
     // Função para tocar uma música
-    function play
+    function playSong(i) {
+      index = i;
+      audio.src = playlist[index].url;
+      audio.play();
+      current.innerText = "Tocando: " + playlist[index].url.split("/").pop();
+    }
 
+    // Quando a música termina, toca a próxima
+    audio.addEventListener("ended", () => {
+      index++;
+      if (index >= playlist.length) index = 0; // volta para o início
+      playSong(index);
+    });
+  </script>
+</body>
+</html>
