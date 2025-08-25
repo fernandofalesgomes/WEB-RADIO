@@ -1,43 +1,69 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Web Rádio AAC</title>
+  <title>Web Rádio Comércio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+    }
+    audio {
+      margin-top: 20px;
+      width: 80%;
+    }
+    #current {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #0f0;
+    }
+  </style>
 </head>
 <body>
-  <h2>Minha Mini Web Rádio</h2>
-
-  <audio id="player" controls autoplay>
-    <source src="musica1.m4a" type="audio/mp4">
-    Seu navegador não suporta áudio.
-  </audio>
-
-  <ul id="playlist">
-    <li data-src="musica1.m4a">Música 1</li>
-    <li data-src="musica2.m4a">Música 2</li>
-    <li data-src="musica3.m4a">Música 3</li>
-  </ul>
+  <h1>🎶 Minha Web Rádio</h1>
+  <p id="current">Carregando playlist...</p>
+  <audio id="player" controls autoplay></audio>
 
   <script>
-    const player = document.getElementById('player');
-    const playlist = document.getElementById('playlist').children;
-    let current = 0;
+    let playlist = [];
+    let index = 0;
+    const audio = document.getElementById("player");
+    const current = document.getElementById("current");
 
-    function playTrack(index) {
-      current = index;
-      player.src = playlist[index].dataset.src;
-      player.play();
+    // Carrega o arquivo playlist.json
+    fetch("playlist.json?v=" + new Date().getTime()) // força pegar versão nova
+      .then(response => response.json())
+      .then(data => {
+        playlist = data;
+        if (playlist.length > 0) {
+          playSong(0);
+        } else {
+          current.innerText = "Nenhuma música na playlist.";
+        }
+      })
+      .catch(err => {
+        current.innerText = "Erro ao carregar playlist!";
+        console.error(err);
+      });
+
+    // Função para tocar uma música
+    function playSong(i) {
+      index = i;
+      audio.src = playlist[index].src;
+      audio.play();
+      current.innerText = "Tocando: " + playlist[index].title;
     }
 
-    player.addEventListener('ended', () => {
-      current++;
-      if(current >= playlist.length) current = 0;
-      playTrack(current);
+    // Quando a música termina, toca a próxima
+    audio.addEventListener("ended", () => {
+      index++;
+      if (index >= playlist.length) index = 0; // volta para o início
+      playSong(index);
     });
-
-    for(let i = 0; i < playlist.length; i++) {
-      playlist[i].addEventListener('click', () => playTrack(i));
-    }
   </script>
 </body>
 </html>
