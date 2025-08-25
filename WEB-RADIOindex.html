@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Rádio Comércio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+    }
+    audio {
+      margin-top: 20px;
+      width: 80%;
+    }
+    #current {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎶 Minha Web Rádio</h1>
+  <p id="current">Carregando playlist...</p>
+  <audio id="player" controls autoplay></audio>
+
+  <script>
+    let playlist = [];
+    let index = 0;
+    const audio = document.getElementById("player");
+    const current = document.getElementById("current");
+
+    // Carrega o arquivo playlist.json
+    fetch("playlist.json?v=" + new Date().getTime()) // força pegar versão nova
+      .then(response => response.json())
+      .then(data => {
+        playlist = data;
+        if (playlist.length > 0) {
+          playSong(0);
+        } else {
+          current.innerText = "Nenhuma música na playlist.";
+        }
+      })
+      .catch(err => {
+        current.innerText = "Erro ao carregar playlist!";
+        console.error(err);
+      });
+
+    // Função para tocar uma música
+    function playSong(i) {
+      index = i;
+      audio.src = playlist[index].src;
+      audio.play();
+      current.innerText = "Tocando: " + playlist[index].title;
+    }
+
+    // Quando a música termina, toca a próxima
+    audio.addEventListener("ended", () => {
+      index++;
+      if (index >= playlist.length) index = 0; // volta para o início
+      playSong(index);
+    });
+  </script>
+</body>
+</html>
