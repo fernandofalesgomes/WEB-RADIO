@@ -2,84 +2,24 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Minimalista Loop</title>
+  <title>Player Minimalista Loop Infinito</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #0d0d0d;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    h1 {
-      margin-bottom: 30px;
-      font-size: 2rem;
-      letter-spacing: 1px;
-    }
-
-    #player-container {
-      background: #1a1a1a;
-      padding: 30px 40px;
-      border-radius: 20px;
-      box-shadow: 0 0 30px rgba(0,255,150,0.2);
-      text-align: center;
-      max-width: 400px;
-      width: 90%;
-    }
-
-    audio { display: none; }
-
-    .controls {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .controls button {
-      background: #00ff99;
-      border: none;
-      border-radius: 50%;
-      width: 80px;
-      height: 80px;
-      font-size: 2rem;
-      cursor: pointer;
-      transition: 0.2s;
-      color: #111;
-      box-shadow: 0 0 25px rgba(0,255,150,0.4);
-    }
-
-    .controls button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(0,255,150,0.6);
-    }
-
-    #vu {
-      display: flex;
-      justify-content: center;
-      margin-top: 30px;
-      height: 60px;
-    }
-
-    .led {
-      width: 6px;
-      height: 100%;
-      margin: 0 2px;
-      background: #004400;
-      border-radius: 2px;
-      transition: height 0.05s, background 0.05s;
-    }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:#0d0d0d; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
+    h1 { margin-bottom:30px; font-size:2rem; letter-spacing:1px; }
+    #player-container { background:#1a1a1a; padding:30px 40px; border-radius:20px; box-shadow:0 0 30px rgba(0,255,150,0.2); text-align:center; max-width:400px; width:90%; }
+    audio { display:none; }
+    .controls { display:flex; justify-content:center; margin-top:20px; }
+    .controls button { background:#00ff99; border:none; border-radius:50%; width:80px; height:80px; font-size:2rem; cursor:pointer; transition:.2s; color:#111; box-shadow:0 0 25px rgba(0,255,150,0.4); }
+    .controls button:hover { transform:scale(1.1); box-shadow:0 0 30px rgba(0,255,150,0.6); }
+    #vu { display:flex; justify-content:center; margin-top:30px; height:60px; }
+    .led { width:6px; height:100%; margin:0 2px; background:#004400; border-radius:2px; transition:height .05s, background .05s; }
   </style>
 </head>
 <body>
   <h1>🎵 Player Minimalista</h1>
 
   <div id="player-container">
-    <audio id="player" autoplay></audio>
+    <audio id="player" autoplay loop></audio> <!-- loop garante repetição automática -->
     <div class="controls">
       <button onclick="togglePlay()">▶️/⏸️</button>
     </div>
@@ -87,11 +27,9 @@
   </div>
 
   <script>
-    // Lista de faixas com MP3 e AAC
+    // Lista de faixas (MP3 ou AAC)
     const musicas = [
-      { mp3: "musica1.mp3", aac: "musica1.aac" },
-      { mp3: "musica2.mp3", aac: "musica2.aac" },
-      { mp3: "musica3.mp3", aac: "musica3.aac" }
+      { mp3: "musica1.mp3", aac: "musica1.aac" }
     ];
 
     let index = 0;
@@ -112,43 +50,24 @@
       player.appendChild(srcAac);
 
       player.load();
-    }
-
-    function playSong() {
       player.play();
-      isPlaying = true;
-    }
-
-    function pauseSong() {
-      player.pause();
-      isPlaying = false;
     }
 
     function togglePlay() {
-      if (isPlaying) {
-        pauseSong();
-      } else {
-        playSong();
-      }
+      if(isPlaying){ player.pause(); isPlaying=false; }
+      else{ player.play(); isPlaying=true; }
     }
 
-    // Avança automaticamente para a próxima faixa em loop infinito
-    player.addEventListener("ended", () => {
-      index = (index + 1) % musicas.length; // loop infinito
-      loadTrack();
-      playSong();
-    });
-
-    // Inicializa primeira faixa
+    // Inicializa a faixa
     loadTrack();
 
     // --- VU meter ---
     const NUM_LEDS = 20;
     const vu = document.getElementById("vu");
     const leds = [];
-    for(let i=0; i<NUM_LEDS; i++){
+    for(let i=0;i<NUM_LEDS;i++){
       const div = document.createElement("div");
-      div.className = "led";
+      div.className="led";
       vu.appendChild(div);
       leds.push(div);
     }
@@ -164,15 +83,15 @@
     function animateVU(){
       analyser.getByteFrequencyData(dataArray);
       for(let i=0;i<NUM_LEDS;i++){
-        const value = dataArray[i] / 255;
-        leds[i].style.height = `${value*60}px`;
-        leds[i].style.background = `rgb(${value*0},${value*255},0)`;
+        const value=dataArray[i]/255;
+        leds[i].style.height=`${value*60}px`;
+        leds[i].style.background=`rgb(${value*0},${value*255},0)`;
       }
       requestAnimationFrame(animateVU);
     }
 
-    player.addEventListener("play", () => {
-      if(audioContext.state === "suspended") audioContext.resume();
+    player.addEventListener("play", ()=>{
+      if(audioContext.state==="suspended") audioContext.resume();
       animateVU();
     });
   </script>
