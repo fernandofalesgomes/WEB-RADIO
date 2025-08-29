@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Minimalista Loop Infinito</title>
+  <title>Player Minimalista Playlist Loop</title>
   <style>
     body { font-family:'Segoe UI',Arial,sans-serif; background:#0d0d0d; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
     h1 { margin-bottom:30px; font-size:2rem; letter-spacing:1px; }
@@ -19,7 +19,7 @@
   <h1>🎵 Player Minimalista</h1>
 
   <div id="player-container">
-    <audio id="player" autoplay loop></audio> <!-- loop garante repetição automática -->
+    <audio id="player" autoplay></audio>
     <div class="controls">
       <button onclick="togglePlay()">▶️/⏸️</button>
     </div>
@@ -27,9 +27,11 @@
   </div>
 
   <script>
-    // Lista de faixas (MP3 ou AAC)
+    // Playlist de faixas (MP3 e AAC)
     const musicas = [
-      { mp3: "ELETRONICA BRITO CARIMBO 01.mp3", aac: "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac" , aac: "musica1.aac" , aac: "musica1.aac" }
+      { mp3: "ELETRONICA BRITO CARIMBO 01.mp3", aac: "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac" },
+      { mp3: "ELETRONICA BRITO CARIMBO 01.mp3", aac: "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac" },
+      { mp3: "ELETRONICA BRITO CARIMBO 01.mp3", aac: "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac" }
     ];
 
     let index = 0;
@@ -54,49 +56,11 @@
     }
 
     function togglePlay() {
-      if(isPlaying){ player.pause(); isPlaying=false; }
-      else{ player.play(); isPlaying=true; }
+      if(isPlaying) { player.pause(); isPlaying=false; }
+      else { player.play(); isPlaying=true; }
     }
 
-    // Inicializa a faixa
-    loadTrack();
-
-    // --- VU meter ---
-    const NUM_LEDS = 20;
-    const vu = document.getElementById("vu");
-    const leds = [];
-    for(let i=0;i<NUM_LEDS;i++){
-      const div = document.createElement("div");
-      div.className="led";
-      vu.appendChild(div);
-      leds.push(div);
-    }
-
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaElementSource(player);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-    analyser.fftSize = 64;
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    function animateVU(){
-      analyser.getByteFrequencyData(dataArray);
-      for(let i=0;i<NUM_LEDS;i++){
-        const value=dataArray[i]/255;
-        leds[i].style.height=`${value*60}px`;
-        leds[i].style.background=`rgb(${value*0},${value*255},0)`;
-      }
-      requestAnimationFrame(animateVU);
-    }
-
-    player.addEventListener("play", ()=>{
-      if(audioContext.state==="suspended") audioContext.resume();
-      animateVU();
-    });
-  </script>
-</body>
-</html>
-
-
-
+    // Avança para a próxima faixa e faz loop infinito
+    player.addEventListener("ended", () => {
+      index = (index + 1) % musicas.length; // volta ao início ao terminar a última
+      loadTr
