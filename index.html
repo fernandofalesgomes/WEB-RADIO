@@ -12,4 +12,102 @@
     .controls button { background:#00ff99; border:none; border-radius:50%; width:80px; height:80px; font-size:2rem; cursor:pointer; transition:.2s; color:#111; box-shadow:0 0 25px rgba(0,255,150,0.4); }
     .controls button:hover { transform:scale(1.1); box-shadow:0 0 30px rgba(0,255,150,0.6); }
     #vu { display:flex; justify-content:center; margin-top:30px; height:60px; }
-    .led { width:6px; height:100%; margin:0 2px; background:#004400; border-radius:2px; transition:height .05s, background
+    .led { width:6px; height:100%; margin:0 2px; background:#004400; border-radius:2px; transition:height .05s, background .05s; }
+  </style>
+</head>
+<body>
+  <h1>🎵 Player Minimalista</h1>
+
+  <div id="player-container">
+    <audio id="player" autoplay></audio>
+    <div class="controls">
+      <button onclick="togglePlay()">▶️/⏸️</button>
+    </div>
+    <div id="vu"></div>
+  </div>
+
+  <script>
+    // Playlist de faixas na raiz do repositório
+    const musicas = [
+      { mp3: "ELETRONICA BRITO CARIMBO 01.mp3", aac: "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac" }
+      // Para adicionar mais faixas, basta adicionar novos objetos aqui:
+      // { mp3: "arquivo.mp3", aac: "arquivo.aac" }
+    ];
+
+    let index = 0;
+    const player = document.getElementById("player");
+    let isPlaying = true;
+
+    function loadTrack() {
+      player.innerHTML = "";
+
+      // MP3
+      if (musicas[index].mp3) {
+        const srcMp3 = document.createElement("source");
+        srcMp3.src = musicas[index].mp3;
+        srcMp3.type = "audio/mpeg";
+        player.appendChild(srcMp3);
+      }
+
+      // AAC
+      if (musicas[index].aac) {
+        const srcAac = document.createElement("source");
+        srcAac.src = musicas[index].aac;
+        srcAac.type = "audio/aac";
+        player.appendChild(srcAac);
+      }
+
+      player.load();
+      player.play();
+    }
+
+    function togglePlay() {
+      if(isPlaying) { player.pause(); isPlaying=false; }
+      else { player.play(); isPlaying=true; }
+    }
+
+    // Avança para a próxima faixa e faz loop infinito
+    player.addEventListener("ended", () => {
+      index = (index + 1) % musicas.length; // volta ao início ao terminar a última
+      loadTrack();
+    });
+
+    // Inicializa primeira faixa
+    loadTrack();
+
+    // --- VU meter ---
+    const NUM_LEDS = 20;
+    const vu = document.getElementById("vu");
+    const leds = [];
+    for(let i=0;i<NUM_LEDS;i++){
+      const div = document.createElement("div");
+      div.className="led";
+      vu.appendChild(div);
+      leds.push(div);
+    }
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaElementSource(player);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+    analyser.fftSize = 64;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function animateVU(){
+      analyser.getByteFrequencyData(dataArray);
+      for(let i=0;i<NUM_LEDS;i++){
+        const value=dataArray[i]/255;
+        leds[i].style.height=`${value*60}px`;
+        leds[i].style.background=`rgb(0,${value*255},0)`;
+      }
+      requestAnimationFrame(animateVU);
+    }
+
+    player.addEventListener("play", ()=>{
+      if(audioContext.state==="suspended") audioContext.resume();
+      animateVU();
+    });
+  </script>
+</body>
+</html>
