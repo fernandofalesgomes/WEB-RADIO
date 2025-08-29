@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Automático Playlist</title>
+  <title>Player Automático Playlist JSON</title>
   <style>
     body { font-family:'Segoe UI',Arial,sans-serif; background:#0d0d0d; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
     h1 { margin-bottom:30px; font-size:2rem; letter-spacing:1px; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h1>🎵 Player Automático</h1>
+  <h1>🎵 Player Automático JSON</h1>
 
   <div id="player-container">
     <audio id="player" autoplay></audio>
@@ -26,16 +26,24 @@
     <div id="vu"></div>
   </div>
 
-  <!-- Incluindo a playlist -->
-  <script src="playlist.js"></script>
-
   <script>
+    let musicas = [];
     let index = 0;
     const player = document.getElementById("player");
     let isPlaying = true;
 
+    // Carrega playlist do JSON
+    fetch("playlist.json")
+      .then(res => res.json())
+      .then(data => {
+        musicas = data;
+        loadTrack();
+      })
+      .catch(err => console.error("Erro ao carregar playlist:", err));
+
     function loadTrack() {
-      player.src = musicas[index]; // carrega o arquivo atual
+      if(musicas.length === 0) return;
+      player.src = musicas[index];
       player.load();
       player.play();
     }
@@ -50,9 +58,6 @@
       index = (index + 1) % musicas.length;
       loadTrack();
     });
-
-    // Inicializa a primeira faixa
-    loadTrack();
 
     // --- VU meter ---
     const NUM_LEDS = 20;
