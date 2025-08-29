@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player GitHub</title>
+  <title>Player Simples</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,60 +12,19 @@
       padding: 50px;
     }
     audio {
-      margin-top: 20px;
       width: 80%;
-    }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background: #28a745;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #218838;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>🎵 Player de Músicas</h1>
-  <audio id="player" controls></audio>
-  <br>
-  <button onclick="prevSong()">⏮️ Anterior</button>
-  <button onclick="nextSong()">⏭️ Próxima</button>
+  <h1>🎶 Player Simples</h1>
 
-  <script>
-    // Lista de músicas que estão na raiz do repositório
-    const musicas = [
-      "https://github.com/fernandofalesgomes/WEB-RADIO/raw/refs/heads/main/musica1.mp3",
-      "musica2.mp3",
-      "musica3.mp3"
-    ];
+  <!-- Player com URL direta do arquivo MP3 -->
+  <audio controls>
+    <source src="pasta/musica1.mp3" type="audio/mpeg">
+    Seu navegador não suporta áudio HTML5.
+  </audio>
 
-    let index = 0;
-    const player = document.getElementById("player");
-
-    // Carrega a primeira música
-    player.src = musicas[index];
-
-    function nextSong() {
-      index = (index + 1) % musicas.length;
-      player.src = musicas[index];
-      player.play();
-    }
-
-    function prevSong() {
-      index = (index - 1 + musicas.length) % musicas.length;
-      player.src = musicas[index];
-      player.play();
-    }
-
-    // Quando terminar, toca a próxima
-    player.addEventListener("ended", nextSong);
-  </script>
 </body>
 </html>
-
