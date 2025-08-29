@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Profissional com VU</title>
+  <title>Player Minimalista com VU</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -38,7 +38,7 @@
 
     .controls {
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
       margin-top: 20px;
     }
 
@@ -46,18 +46,18 @@
       background: #00ff99;
       border: none;
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      font-size: 1.5rem;
+      width: 80px;
+      height: 80px;
+      font-size: 2rem;
       cursor: pointer;
       transition: 0.2s;
       color: #111;
-      box-shadow: 0 0 20px rgba(0,255,150,0.4);
+      box-shadow: 0 0 25px rgba(0,255,150,0.4);
     }
 
     .controls button:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 25px rgba(0,255,150,0.6);
+      box-shadow: 0 0 30px rgba(0,255,150,0.6);
     }
 
     /* VU Meter */
@@ -79,65 +79,29 @@
   </style>
 </head>
 <body>
-  <h1>🎵 Player Profissional</h1>
+  <h1>🎵 Player Minimalista</h1>
 
   <div id="player-container">
-    <audio id="player"></audio>
+    <audio id="player" src="musica1.mp3" autoplay></audio>
     <div class="controls">
-      <button onclick="prevSong()">⏮️</button>
       <button onclick="togglePlay()">▶️/⏸️</button>
-      <button onclick="nextSong()">⏭️</button>
     </div>
     <div id="vu"></div>
   </div>
 
   <script>
-    const musicas = [
-      "musica1.mp3",
-      "musica2.mp3",
-      "musica3.mp3"
-    ];
-
-    let index = 0;
     const player = document.getElementById("player");
-    let isPlaying = false;
-
-    function loadTrack() {
-      player.src = musicas[index];
-    }
-
-    function playSong() {
-      player.play();
-      isPlaying = true;
-    }
-
-    function pauseSong() {
-      player.pause();
-      isPlaying = false;
-    }
+    let isPlaying = true;
 
     function togglePlay() {
       if (isPlaying) {
-        pauseSong();
+        player.pause();
+        isPlaying = false;
       } else {
-        playSong();
+        player.play();
+        isPlaying = true;
       }
     }
-
-    function nextSong() {
-      index = (index + 1) % musicas.length;
-      loadTrack();
-      playSong();
-    }
-
-    function prevSong() {
-      index = (index - 1 + musicas.length) % musicas.length;
-      loadTrack();
-      playSong();
-    }
-
-    player.addEventListener("ended", nextSong);
-    loadTrack();
 
     // --- VU meter ---
     const NUM_LEDS = 20;
@@ -172,7 +136,6 @@
       if(audioContext.state === "suspended") audioContext.resume();
       animateVU();
     });
-
   </script>
 </body>
 </html>
