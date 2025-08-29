@@ -91,4 +91,88 @@
     <div id="vu"></div>
   </div>
 
-  <s
+  <script>
+    const musicas = [
+      "musica1.mp3",
+      "musica2.mp3",
+      "musica3.mp3"
+    ];
+
+    let index = 0;
+    const player = document.getElementById("player");
+    let isPlaying = false;
+
+    function loadTrack() {
+      player.src = musicas[index];
+    }
+
+    function playSong() {
+      player.play();
+      isPlaying = true;
+    }
+
+    function pauseSong() {
+      player.pause();
+      isPlaying = false;
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pauseSong();
+      } else {
+        playSong();
+      }
+    }
+
+    function nextSong() {
+      index = (index + 1) % musicas.length;
+      loadTrack();
+      playSong();
+    }
+
+    function prevSong() {
+      index = (index - 1 + musicas.length) % musicas.length;
+      loadTrack();
+      playSong();
+    }
+
+    player.addEventListener("ended", nextSong);
+    loadTrack();
+
+    // --- VU meter ---
+    const NUM_LEDS = 20;
+    const vu = document.getElementById("vu");
+    const leds = [];
+    for(let i=0; i<NUM_LEDS; i++){
+      const div = document.createElement("div");
+      div.className = "led";
+      vu.appendChild(div);
+      leds.push(div);
+    }
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaElementSource(player);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+    analyser.fftSize = 64;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function animateVU(){
+      analyser.getByteFrequencyData(dataArray);
+      for(let i=0;i<NUM_LEDS;i++){
+        const value = dataArray[i] / 255;
+        leds[i].style.height = `${value*60}px`;
+        leds[i].style.background = `rgb(${value*0},${value*255},0)`;
+      }
+      requestAnimationFrame(animateVU);
+    }
+
+    player.addEventListener("play", () => {
+      if(audioContext.state === "suspended") audioContext.resume();
+      animateVU();
+    });
+
+  </script>
+</body>
+</html>
