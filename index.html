@@ -19,7 +19,7 @@
   <h1>🎵 Player Playlist Loop</h1>
 
   <div id="player-container">
-    <audio id="player" autoplay></audio>
+    <audio id="player"></audio>
     <div class="controls">
       <button onclick="togglePlay()">▶️/⏸️</button>
     </div>
@@ -27,24 +27,28 @@
   </div>
 
   <script>
-    // Adicione aqui todos os arquivos que você quer tocar
+    // Lista de arquivos (coloque aqui todas as músicas que deseja tocar)
     const musicas = [
       "ELETRONICA BRITO CARIMBO 01.mp3",
       "ELETRONICA BRITO CARIMBO 02.mp3",
       "ELETRONICA BRITO CARIMBO 03.mp3",
       "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac"
-      // Para adicionar novas faixas, só colocar mais linhas aqui
     ];
 
     let index = 0;
     const player = document.getElementById("player");
-    let isPlaying = true;
+    let isPlaying = false;
 
     function loadTrack() {
       if(musicas.length === 0) return;
-      player.src = musicas[index];
+
+      // encodeURI trata espaços e caracteres especiais
+      player.src = encodeURI(musicas[index]);
       player.load();
-      player.play();
+      player.play().catch(() => { 
+        // caso o navegador bloqueie autoplay
+        console.log("Clique no botão Play para iniciar a música");
+      });
     }
 
     function togglePlay() {
@@ -54,12 +58,17 @@
 
     // Loop infinito da playlist
     player.addEventListener("ended", () => {
-      index = (index + 1) % musicas.length; // passa para a próxima faixa e volta ao início
+      index = (index + 1) % musicas.length;
       loadTrack();
     });
 
-    // Inicializa a primeira faixa
-    loadTrack();
+    // Inicializa a primeira faixa apenas após o primeiro clique
+    document.querySelector(".controls button").addEventListener("click", ()=>{
+      if(!isPlaying){
+        isPlaying = true;
+        loadTrack();
+      }
+    });
 
     // --- VU meter ---
     const NUM_LEDS = 20;
@@ -72,4 +81,10 @@
       leds.push(div);
     }
 
-    const audioContext = new (window.AudioContext || window.webkit
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaElementSource(player);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+    analyser.fftSize = 64;
+    const dataArray = n
