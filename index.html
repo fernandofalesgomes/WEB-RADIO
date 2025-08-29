@@ -94,10 +94,9 @@
 
   <script>
     // Lista de URLs de arquivos de áudio
-    // IMPORTANTE: Por questões de segurança, os navegadores não permitem
-    // acessar arquivos locais (do seu computador). Você deve usar URLs
-    // de arquivos que estejam hospedados em algum lugar.
-    // Substitua estas URLs pelas suas.
+    // IMPORTANTE: O GitHub não é um servidor de streaming. Se tiver problemas
+    // com a reprodução, é recomendado usar um serviço de hospedagem de arquivos
+    // dedicado ou um servidor web.
     const musicas = [
       "https://github.com/fernandofalesgomes/WEB-RADIO/raw/refs/heads/main/00%20-%20ELETRONICA%20BRITO%20-%20ELETRONICA%20BRITO%20CARIMBO%2002.aac",
       "https://github.com/fernandofalesgomes/WEB-RADIO/raw/refs/heads/main/00%20-%20aac%20-%20TRILHAS%20ESPORTIVAS%20NOVAS%20(4).aac",
@@ -112,18 +111,15 @@
     let audioContext, analyser, source, dataArray;
 
     function initAudioContext() {
-      // Inicia o AudioContext após o primeiro clique do usuário
-      // para evitar problemas com políticas de autoplay do navegador.
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
-        // Aumenta a suavidade da animação do VU meter
         analyser.smoothingTimeConstant = 0.8;
         analyser.fftSize = 64;
         source = audioContext.createMediaElementSource(player);
         source.connect(analyser);
         analyser.connect(audioContext.destination);
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        dataArray = new Uint8Array(analyser.frequencyBinCoun);
         createVUMeter();
         animateVUMeter();
       }
@@ -138,17 +134,21 @@
       const musicaAtual = musicas[index];
       player.src = musicaAtual;
       
-      // Atualiza o nome da música na tela
       const nomeArquivo = musicaAtual.split('/').pop();
       currentTrackName.textContent = decodeURIComponent(nomeArquivo);
 
       player.load();
-      player.play().catch(() => {
-        // Se o navegador bloquear o autoplay, o usuário precisa interagir
-        console.log("Clique no botão Play para iniciar a música.");
+      player.play().then(() => {
+        isPlaying = true;
+        playBtn.textContent = "⏸️";
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+      }).catch(e => {
+        console.error("Erro ao tentar tocar a música:", e);
+        isPlaying = false;
+        playBtn.textContent = "▶️";
       });
-      isPlaying = true;
-      playBtn.textContent = "⏸️";
     }
 
     function togglePlay() {
@@ -158,17 +158,18 @@
       } else {
         player.play();
         playBtn.textContent = "⏸️";
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
       }
       isPlaying = !isPlaying;
     }
 
-    // Loop infinito da playlist
     player.addEventListener("ended", () => {
       index = (index + 1) % musicas.length;
       loadTrack();
     });
 
-    // Inicia a primeira faixa e o contexto de áudio apenas após o primeiro clique
     playBtn.addEventListener("click", () => {
       initAudioContext();
       if (!isPlaying) {
@@ -193,29 +194,25 @@
     }
 
     function animateVUMeter() {
-      // Pega os dados de frequência do analisador
-      analyser.getByteFrequencyData(dataArray);
+      if (analyser && audioContext.state === 'running') {
+        analyser.getByteFrequencyData(dataArray);
 
-      // Mapeia os dados para a altura e cor dos LEDs
-      for (let i = 0; i < NUM_LEDS; i++) {
-        const value = dataArray[i] / 255.0; // Normaliza o valor entre 0 e 1
-        let height = value * 100;
-        
-        // Define a cor baseada na intensidade
-        let color = "#004400"; // Verde escuro para LED desligado
-        if (value > 0.05) color = "#00ff99"; // Verde claro
-        if (value > 0.5) color = "#ffcc00"; // Amarelo
-        if (value > 0.8) color = "#ff0000"; // Vermelho
+        for (let i = 0; i < NUM_LEDS; i++) {
+          const value = dataArray[i] / 255.0;
+          let height = value * 100;
+          
+          let color = "#004400";
+          if (value > 0.05) color = "#00ff99";
+          if (value > 0.5) color = "#ffcc00";
+          if (value > 0.8) color = "#ff0000";
 
-        leds[i].style.height = `${height}%`;
-        leds[i].style.background = color;
+          leds[i].style.height = `${height}%`;
+          leds[i].style.background = color;
+        }
       }
 
-      // Chama a função novamente na próxima renderização do frame
       requestAnimationFrame(animateVUMeter);
     }
   </script>
 </body>
 </html>
-
-
