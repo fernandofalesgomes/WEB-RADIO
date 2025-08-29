@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Minimalista com MP3 e AAC</title>
+  <title>Player Minimalista Loop</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -32,9 +32,7 @@
       width: 90%;
     }
 
-    audio {
-      display: none;
-    }
+    audio { display: none; }
 
     .controls {
       display: flex;
@@ -89,11 +87,11 @@
   </div>
 
   <script>
-    // Lista de faixas com extensão MP3 e AAC
+    // Lista de faixas com MP3 e AAC
     const musicas = [
-      { mp3: "musica4.mp3", aac: "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac" },
-      { mp3: "musica5.mp3", aac: "musica2.aac" },
-      { mp3: "musica6.mp3", aac: "musica3.aac" }
+      { mp3: "musica1.mp3", aac: "musica1.aac" },
+      { mp3: "musica2.mp3", aac: "musica2.aac" },
+      { mp3: "musica3.mp3", aac: "musica3.aac" }
     ];
 
     let index = 0;
@@ -101,10 +99,8 @@
     let isPlaying = true;
 
     function loadTrack() {
-      // Limpa fontes existentes
       player.innerHTML = "";
-      
-      // Adiciona as duas opções
+
       const srcMp3 = document.createElement("source");
       srcMp3.src = musicas[index].mp3;
       srcMp3.type = "audio/mpeg";
@@ -136,14 +132,14 @@
       }
     }
 
-    // Avança automaticamente para a próxima faixa
+    // Avança automaticamente para a próxima faixa em loop infinito
     player.addEventListener("ended", () => {
-      index = (index + 1) % musicas.length;
+      index = (index + 1) % musicas.length; // loop infinito
       loadTrack();
       playSong();
     });
 
-    // Inicializa a primeira faixa
+    // Inicializa primeira faixa
     loadTrack();
 
     // --- VU meter ---
@@ -182,4 +178,3 @@
   </script>
 </body>
 </html>
-
