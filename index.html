@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Automático Playlist JSON</title>
+  <title>Player Playlist Loop</title>
   <style>
     body { font-family:'Segoe UI',Arial,sans-serif; background:#0d0d0d; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
     h1 { margin-bottom:30px; font-size:2rem; letter-spacing:1px; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h1>🎵 Player Automático JSON</h1>
+  <h1>🎵 Player Playlist Loop</h1>
 
   <div id="player-container">
     <audio id="player" autoplay></audio>
@@ -27,19 +27,18 @@
   </div>
 
   <script>
-    let musicas = [];
+    // Adicione aqui todos os arquivos que você quer tocar
+    const musicas = [
+      "ELETRONICA BRITO CARIMBO 01.mp3",
+      "ELETRONICA BRITO CARIMBO 02.mp3",
+      "ELETRONICA BRITO CARIMBO 03.mp3",
+      "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac"
+      // Para adicionar novas faixas, só colocar mais linhas aqui
+    ];
+
     let index = 0;
     const player = document.getElementById("player");
     let isPlaying = true;
-
-    // Carrega playlist do JSON
-    fetch("playlist.json")
-      .then(res => res.json())
-      .then(data => {
-        musicas = data;
-        loadTrack();
-      })
-      .catch(err => console.error("Erro ao carregar playlist:", err));
 
     function loadTrack() {
       if(musicas.length === 0) return;
@@ -55,9 +54,12 @@
 
     // Loop infinito da playlist
     player.addEventListener("ended", () => {
-      index = (index + 1) % musicas.length;
+      index = (index + 1) % musicas.length; // passa para a próxima faixa e volta ao início
       loadTrack();
     });
+
+    // Inicializa a primeira faixa
+    loadTrack();
 
     // --- VU meter ---
     const NUM_LEDS = 20;
@@ -70,28 +72,4 @@
       leds.push(div);
     }
 
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaElementSource(player);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-    analyser.fftSize = 64;
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    function animateVU(){
-      analyser.getByteFrequencyData(dataArray);
-      for(let i=0;i<NUM_LEDS;i++){
-        const value=dataArray[i]/255;
-        leds[i].style.height=`${value*60}px`;
-        leds[i].style.background=`rgb(0,${value*255},0)`;
-      }
-      requestAnimationFrame(animateVU);
-    }
-
-    player.addEventListener("play", ()=>{
-      if(audioContext.state==="suspended") audioContext.resume();
-      animateVU();
-    });
-  </script>
-</body>
-</html>
+    const audioContext = new (window.AudioContext || window.webkit
