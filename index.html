@@ -32,13 +32,6 @@
       width: 90%;
     }
 
-    #track-name {
-      margin-bottom: 20px;
-      font-weight: bold;
-      font-size: 1.1rem;
-      color: #00ff99;
-    }
-
     audio {
       display: none;
     }
@@ -89,7 +82,6 @@
   <h1>🎵 Player Profissional</h1>
 
   <div id="player-container">
-    <div id="no track-name">Carregando...</div>
     <audio id="player"></audio>
     <div class="controls">
       <button onclick="prevSong()">⏮️</button>
@@ -99,52 +91,4 @@
     <div id="vu"></div>
   </div>
 
-  <script>
-    const musicas = [
-      "musica1.mp3",
-      "musica2.mp3",
-      "musica3.mp3"
-    ];
-
-    let index = 0;
-    const player = document.getElementById("player");
-    const trackName = document.getElementById("track-name");
-    let isPlaying = false;
-
-    function loadTrack() {
-      player.src = musicas[index];
-      trackName.textContent = musicas[index];
-    }
-
-    function playSong() {
-      player.play();
-      isPlaying = true;
-    }
-
-    function pauseSong() {
-      player.pause();
-      isPlaying = false;
-    }
-
-    function togglePlay() {
-      if (isPlaying) {
-        pauseSong();
-      } else {
-        playSong();
-      }
-    }
-
-    function nextSong() {
-      index = (index + 1) % musicas.length;
-      loadTrack();
-      playSong();
-    }
-
-    function prevSong() {
-      index = (index - 1 + musicas.length) % musicas.length;
-      loadTrack();
-      playSong();
-    }
-
-    player.addEventListener("ended", nextSong
-
+  <s
