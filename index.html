@@ -35,10 +35,9 @@
 </head>
 <body>
   <h1>🎵 Player de Músicas</h1>
-  <audio id="player" controls></audio>
-  <br>
-  <button onclick="prevSong()">⏮️ Anterior</button>
-  <button onclick="nextSong()">⏭️ Próxima</button>
+  <audio id="player"></audio>
+<button onclick="player.play()">▶️ Play</button>
+<button onclick="player.pause()">⏸️ Pause</button>
 
   <script>
     // Lista dos arquivos .mp3 que estão na raiz do repositório
@@ -72,5 +71,6 @@
   </script>
 </body>
 </html>
+
 
 
