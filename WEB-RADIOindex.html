@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Simples</title>
+  <title>Player de Músicas</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,20 +11,64 @@
       text-align: center;
       padding: 50px;
     }
+    h1 {
+      margin-bottom: 20px;
+    }
     audio {
-      width: 80%;
       margin-top: 20px;
+      width: 80%;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
     }
   </style>
 </head>
 <body>
-  <h1>🎶 Player Simples</h1>
+  <h1>🎵 Player de Músicas</h1>
+  <audio id="player" controls></audio>
+  <br>
+  <button onclick="prevSong()">⏮️ Anterior</button>
+  <button onclick="nextSong()">⏭️ Próxima</button>
 
-  <!-- Aqui você coloca o nome do arquivo que está na raiz -->
-  <audio controls>
-    <source src="musica1.mp3" type="audio/mpeg">
-    Seu navegador não suporta áudio HTML5.
-  </audio>
+  <script>
+    // Lista dos arquivos .mp3 que estão na raiz do repositório
+    const musicas = [
+      "musica1.mp3",
+      "musica2.mp3",
+      "musica3.mp3"
+      // adicione mais aqui conforme precisar
+    ];
 
+    let index = 0;
+    const player = document.getElementById("player");
+
+    // Carrega a primeira música
+    player.src = musicas[index];
+
+    function nextSong() {
+      index = (index + 1) % musicas.length;
+      player.src = musicas[index];
+      player.play();
+    }
+
+    function prevSong() {
+      index = (index - 1 + musicas.length) % musicas.length;
+      player.src = musicas[index];
+      player.play();
+    }
+
+    // Quando terminar, toca a próxima automaticamente
+    player.addEventListener("ended", nextSong);
+  </script>
 </body>
 </html>
