@@ -2,58 +2,164 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Playlist Loop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎵 Player Playlist Loop</title>
   <style>
-    body { font-family:'Segoe UI',Arial,sans-serif; background:#0d0d0d; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
-    h1 { margin-bottom:30px; font-size:2rem; letter-spacing:1px; }
-    #player-container { background:#1a1a1a; padding:30px 40px; border-radius:20px; box-shadow:0 0 30px rgba(0,255,150,0.2); text-align:center; max-width:400px; width:90%; }
-    audio { display:none; }
-    .controls { display:flex; justify-content:center; margin-top:20px; }
-    .controls button { background:#00ff99; border:none; border-radius:50%; width:80px; height:80px; font-size:2rem; cursor:pointer; transition:.2s; color:#111; box-shadow:0 0 25px rgba(0,255,150,0.4); }
-    .controls button:hover { transform:scale(1.1); box-shadow:0 0 30px rgba(0,255,150,0.6); }
-    #vu { display:flex; justify-content:center; margin-top:30px; height:60px; }
-    .led { width:6px; height:100%; margin:0 2px; background:#004400; border-radius:2px; transition:height .05s, background .05s; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d0d0d;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    h1 {
+      margin-bottom: 30px;
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+    #player-container {
+      background: #1a1a1a;
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 255, 150, 0.2);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    #current-track {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: #00ff99;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    audio {
+      display: none;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .controls button {
+      background: #00ff99;
+      border: none;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: .2s;
+      color: #111;
+      box-shadow: 0 0 25px rgba(0, 255, 150, 0.4);
+    }
+    .controls button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(0, 255, 150, 0.6);
+    }
+    #vu-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      height: 60px;
+      align-items: flex-end;
+    }
+    .led {
+      width: 6px;
+      height: 100%;
+      margin: 0 2px;
+      background: #004400;
+      border-radius: 2px;
+      transition: height .05s, background .05s;
+    }
   </style>
 </head>
 <body>
   <h1>🎵 Player Playlist Loop</h1>
 
   <div id="player-container">
+    <p id="current-track">Nenhuma música carregada</p>
     <audio id="player"></audio>
     <div class="controls">
-      <button onclick="togglePlay()">▶️/⏸️</button>
+      <button id="play-btn">▶️</button>
     </div>
-    <div id="vu"></div>
+    <div id="vu-container"></div>
   </div>
 
   <script>
-    // Lista de arquivos (coloque aqui todas as músicas que deseja tocar)
+    // Lista de URLs de arquivos de áudio
+    // IMPORTANTE: Por questões de segurança, os navegadores não permitem
+    // acessar arquivos locais (do seu computador). Você deve usar URLs
+    // de arquivos que estejam hospedados em algum lugar.
+    // Substitua estas URLs pelas suas.
     const musicas = [
-      "ELETRONICA BRITO CARIMBO 01.mp3",
-      "ELETRONICA BRITO CARIMBO 02.mp3",
-      "ELETRONICA BRITO CARIMBO 03.mp3",
-      "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac"
+      "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+      "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
     ];
 
     let index = 0;
     const player = document.getElementById("player");
+    const playBtn = document.getElementById("play-btn");
+    const currentTrackName = document.getElementById("current-track");
     let isPlaying = false;
+    let audioContext, analyser, source, dataArray;
+
+    function initAudioContext() {
+      // Inicia o AudioContext após o primeiro clique do usuário
+      // para evitar problemas com políticas de autoplay do navegador.
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        // Aumenta a suavidade da animação do VU meter
+        analyser.smoothingTimeConstant = 0.8;
+        analyser.fftSize = 64;
+        source = audioContext.createMediaElementSource(player);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        createVUMeter();
+        animateVUMeter();
+      }
+    }
 
     function loadTrack() {
-      if(musicas.length === 0) return;
+      if (musicas.length === 0) {
+        currentTrackName.textContent = "Playlist vazia";
+        return;
+      }
+      
+      const musicaAtual = musicas[index];
+      player.src = musicaAtual;
+      
+      // Atualiza o nome da música na tela
+      const nomeArquivo = musicaAtual.split('/').pop();
+      currentTrackName.textContent = decodeURIComponent(nomeArquivo);
 
-      // encodeURI trata espaços e caracteres especiais
-      player.src = encodeURI(musicas[index]);
       player.load();
-      player.play().catch(() => { 
-        // caso o navegador bloqueie autoplay
-        console.log("Clique no botão Play para iniciar a música");
+      player.play().catch(() => {
+        // Se o navegador bloquear o autoplay, o usuário precisa interagir
+        console.log("Clique no botão Play para iniciar a música.");
       });
+      isPlaying = true;
+      playBtn.textContent = "⏸️";
     }
 
     function togglePlay() {
-      if(isPlaying){ player.pause(); isPlaying=false; }
-      else { player.play(); isPlaying=true; }
+      if (isPlaying) {
+        player.pause();
+        playBtn.textContent = "▶️";
+      } else {
+        player.play();
+        playBtn.textContent = "⏸️";
+      }
+      isPlaying = !isPlaying;
     }
 
     // Loop infinito da playlist
@@ -62,29 +168,52 @@
       loadTrack();
     });
 
-    // Inicializa a primeira faixa apenas após o primeiro clique
-    document.querySelector(".controls button").addEventListener("click", ()=>{
-      if(!isPlaying){
-        isPlaying = true;
+    // Inicia a primeira faixa e o contexto de áudio apenas após o primeiro clique
+    playBtn.addEventListener("click", () => {
+      initAudioContext();
+      if (!isPlaying) {
         loadTrack();
+      } else {
+        togglePlay();
       }
     });
 
     // --- VU meter ---
     const NUM_LEDS = 20;
-    const vu = document.getElementById("vu");
+    const vuContainer = document.getElementById("vu-container");
     const leds = [];
-    for(let i=0;i<NUM_LEDS;i++){
-      const div = document.createElement("div");
-      div.className="led";
-      vu.appendChild(div);
-      leds.push(div);
+    
+    function createVUMeter() {
+      for (let i = 0; i < NUM_LEDS; i++) {
+        const div = document.createElement("div");
+        div.className = "led";
+        vuContainer.appendChild(div);
+        leds.push(div);
+      }
     }
 
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaElementSource(player);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-    analyser.fftSize = 64;
-    const dataArray = n
+    function animateVUMeter() {
+      // Pega os dados de frequência do analisador
+      analyser.getByteFrequencyData(dataArray);
+
+      // Mapeia os dados para a altura e cor dos LEDs
+      for (let i = 0; i < NUM_LEDS; i++) {
+        const value = dataArray[i] / 255.0; // Normaliza o valor entre 0 e 1
+        let height = value * 100;
+        
+        // Define a cor baseada na intensidade
+        let color = "#004400"; // Verde escuro para LED desligado
+        if (value > 0.05) color = "#00ff99"; // Verde claro
+        if (value > 0.5) color = "#ffcc00"; // Amarelo
+        if (value > 0.8) color = "#ff0000"; // Vermelho
+
+        leds[i].style.height = `${height}%`;
+        leds[i].style.background = color;
+      }
+
+      // Chama a função novamente na próxima renderização do frame
+      requestAnimationFrame(animateVUMeter);
+    }
+  </script>
+</body>
+</html>
