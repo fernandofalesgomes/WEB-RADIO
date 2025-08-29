@@ -32,13 +32,6 @@
       width: 90%;
     }
 
-    #track-name {
-      margin-bottom: 20px;
-      font-weight: bold;
-      font-size: 1.1rem;
-      color: #00ff99;
-    }
-
     audio {
       display: none;
     }
@@ -89,7 +82,6 @@
   <h1>🎵 Player Profissional</h1>
 
   <div id="player-container">
-    <div id="track-name">Carregando...</div>
     <audio id="player"></audio>
     <div class="controls">
       <button onclick="prevSong()">⏮️</button>
@@ -108,12 +100,10 @@
 
     let index = 0;
     const player = document.getElementById("player");
-    const trackName = document.getElementById("track-name");
     let isPlaying = false;
 
     function loadTrack() {
       player.src = musicas[index];
-      trackName.textContent = musicas[index];
     }
 
     function playSong() {
@@ -178,7 +168,6 @@
       requestAnimationFrame(animateVU);
     }
 
-    // Start animation quando tocar
     player.addEventListener("play", () => {
       if(audioContext.state === "suspended") audioContext.resume();
       animateVU();
