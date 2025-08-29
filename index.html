@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Minimalista Playlist Loop</title>
+  <title>Player Automático Playlist</title>
   <style>
     body { font-family:'Segoe UI',Arial,sans-serif; background:#0d0d0d; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
     h1 { margin-bottom:30px; font-size:2rem; letter-spacing:1px; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h1>🎵 Player Minimalista</h1>
+  <h1>🎵 Player Automático</h1>
 
   <div id="player-container">
     <audio id="player" autoplay></audio>
@@ -26,54 +26,32 @@
     <div id="vu"></div>
   </div>
 
-  <script>
-    // Playlist de faixas na raiz do repositório
-    const musicas = [
-      { mp3: "ELETRONICA BRITO CARIMBO 01.mp3", aac: "00 - ELETRONICA BRITO - ELETRONICA BRITO CARIMBO 01.aac" },
-      { mp3: "ELETRONICA BRITO CARIMBO 02.mp3", aac: "00 - ELETRONICA BRITO - ELETRONICA BRITO CARIMBO 02.aac" },
-      { mp3: "ELETRONICA BRITO CARIMBO 03.mp3", aac: "00 - ELETRONICA BRITO - ELETRONICA BRITO CARIMBO 03.aac" },
-      { mp3: null, aac: "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac" } // sem MP3
-    ];
+  <!-- Incluindo a playlist -->
+  <script src="playlist.js"></script>
 
+  <script>
     let index = 0;
     const player = document.getElementById("player");
     let isPlaying = true;
 
     function loadTrack() {
-      player.innerHTML = "";
-
-      // MP3
-      if (musicas[index].mp3) {
-        const srcMp3 = document.createElement("source");
-        srcMp3.src = musicas[index].mp3;
-        srcMp3.type = "audio/mpeg";
-        player.appendChild(srcMp3);
-      }
-
-      // AAC
-      if (musicas[index].aac) {
-        const srcAac = document.createElement("source");
-        srcAac.src = musicas[index].aac;
-        srcAac.type = "audio/aac";
-        player.appendChild(srcAac);
-      }
-
+      player.src = musicas[index]; // carrega o arquivo atual
       player.load();
       player.play();
     }
 
     function togglePlay() {
-      if(isPlaying) { player.pause(); isPlaying=false; }
+      if(isPlaying){ player.pause(); isPlaying=false; }
       else { player.play(); isPlaying=true; }
     }
 
-    // Avança para a próxima faixa e faz loop infinito
+    // Loop infinito da playlist
     player.addEventListener("ended", () => {
-      index = (index + 1) % musicas.length; // volta ao início ao terminar a última
+      index = (index + 1) % musicas.length;
       loadTrack();
     });
 
-    // Inicializa primeira faixa
+    // Inicializa a primeira faixa
     loadTrack();
 
     // --- VU meter ---
