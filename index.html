@@ -2,8 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎵 Player Playlist Loop</title>
+  <title>Player Moderno</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -15,213 +14,126 @@
       justify-content: center;
       height: 100vh;
       margin: 0;
-      overflow: hidden;
     }
+
     h1 {
       margin-bottom: 30px;
       font-size: 2rem;
       letter-spacing: 1px;
     }
+
     #player-container {
       background: #1a1a1a;
       padding: 30px 40px;
       border-radius: 20px;
-      box-shadow: 0 0 30px rgba(0, 255, 150, 0.2);
+      box-shadow: 0 0 30px rgba(0,255,150,0.2);
       text-align: center;
       max-width: 400px;
       width: 90%;
     }
-    #current-track {
-      font-size: 1.2rem;
+
+    #track-name {
       margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 1.1rem;
       color: #00ff99;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
+
     audio {
-      display: none;
+      display: none; /* Escondemos o player padrão */
     }
+
     .controls {
       display: flex;
-      justify-content: center;
+      justify-content: space-around;
       margin-top: 20px;
     }
+
     .controls button {
       background: #00ff99;
       border: none;
       border-radius: 50%;
-      width: 80px;
-      height: 80px;
-      font-size: 2rem;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
       cursor: pointer;
-      transition: .2s;
+      transition: 0.2s;
       color: #111;
-      box-shadow: 0 0 25px rgba(0, 255, 150, 0.4);
+      box-shadow: 0 0 20px rgba(0,255,150,0.4);
     }
+
     .controls button:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(0, 255, 150, 0.6);
+      box-shadow: 0 0 25px rgba(0,255,150,0.6);
     }
-    #vu-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 30px;
-      height: 60px;
-      align-items: flex-end;
-    }
-    .led {
-      width: 6px;
-      height: 100%;
-      margin: 0 2px;
-      background: #004400;
-      border-radius: 2px;
-      transition: height .05s, background .05s;
-    }
+
   </style>
 </head>
 <body>
-  <h1>🎵 Player Playlist Loop</h1>
+  <h1>🎵 Player Profissional</h1>
 
   <div id="player-container">
-    <p id="current-track">Nenhuma música carregada</p>
+    <div id="track-name">Carregando...</div>
     <audio id="player"></audio>
     <div class="controls">
-      <button id="play-btn">▶️</button>
+      <button onclick="prevSong()">⏮️</button>
+      <button onclick="togglePlay()">▶️/⏸️</button>
+      <button onclick="nextSong()">⏭️</button>
     </div>
-    <div id="vu-container"></div>
   </div>
 
   <script>
-    // IMPORTANTE: Adicione as URLs das suas músicas neste array.
-    // Lembre-se, as URLs devem ser links diretos de áudio (que permitem streaming),
-    // e não links de download (como os do GitHub).
     const musicas = [
-      // Exemplo de uma URL que funciona para streaming:
-      "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-      // Adicione suas próprias músicas aqui, por exemplo:
-      // "https://fernandofalesgomes/00 - ELETRONICA BRITO - ELETRONICA BRITO CARIMBO 01.aac",
-      // "https://link-direto.com/outra-musica.aac"
+      "musica1.mp3",
+      "musica2.mp3",
+      "musica3.mp3"
     ];
 
     let index = 0;
     const player = document.getElementById("player");
-    const playBtn = document.getElementById("play-btn");
-    const currentTrackName = document.getElementById("current-track");
+    const trackName = document.getElementById("track-name");
     let isPlaying = false;
-    let audioContext, analyser, source, dataArray;
-
-    function initAudioContext() {
-      // Inicia o AudioContext após o primeiro clique do usuário
-      // para evitar problemas com políticas de autoplay do navegador.
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        // Aumenta a suavidade da animação do VU meter
-        analyser.smoothingTimeConstant = 0.8;
-        analyser.fftSize = 64;
-        source = audioContext.createMediaElementSource(player);
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-        createVUMeter();
-        animateVUMeter();
-      }
-    }
 
     function loadTrack() {
-      if (musicas.length === 0) {
-        currentTrackName.textContent = "Playlist vazia";
-        return;
-      }
-      
-      const musicaAtual = musicas[index];
-      player.src = musicaAtual;
-      
-      // Atualiza o nome da música na tela
-      const nomeArquivo = musicaAtual.split('/').pop();
-      currentTrackName.textContent = decodeURIComponent(nomeArquivo);
+      player.src = musicas[index];
+      trackName.textContent = musicas[index];
+    }
 
-      player.load();
-      player.play().then(() => {
-        isPlaying = true;
-        playBtn.textContent = "⏸️";
-        // Resume o AudioContext para garantir que o som funcione
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-      }).catch(e => {
-        console.error("Erro ao tentar tocar a música:", e);
-        isPlaying = false;
-        playBtn.textContent = "▶️";
-      });
+    function playSong() {
+      player.play();
+      isPlaying = true;
+    }
+
+    function pauseSong() {
+      player.pause();
+      isPlaying = false;
     }
 
     function togglePlay() {
       if (isPlaying) {
-        player.pause();
-        playBtn.textContent = "▶️";
+        pauseSong();
       } else {
-        player.play();
-        playBtn.textContent = "⏸️";
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
+        playSong();
       }
-      isPlaying = !isPlaying;
     }
 
-    // Loop infinito da playlist
-    player.addEventListener("ended", () => {
+    function nextSong() {
       index = (index + 1) % musicas.length;
       loadTrack();
-    });
-
-    // Inicia a primeira faixa e o contexto de áudio apenas após o primeiro clique
-    playBtn.addEventListener("click", () => {
-      initAudioContext();
-      if (!isPlaying) {
-        loadTrack();
-      } else {
-        togglePlay();
-      }
-    });
-
-    // --- VU meter ---
-    const NUM_LEDS = 20;
-    const vuContainer = document.getElementById("vu-container");
-    const leds = [];
-    
-    function createVUMeter() {
-      for (let i = 0; i < NUM_LEDS; i++) {
-        const div = document.createElement("div");
-        div.className = "led";
-        vuContainer.appendChild(div);
-        leds.push(div);
-      }
+      playSong();
     }
 
-    function animateVUMeter() {
-      if (analyser && audioContext.state === 'running') {
-        analyser.getByteFrequencyData(dataArray);
-
-        for (let i = 0; i < NUM_LEDS; i++) {
-          const value = dataArray[i] / 255.0;
-          let height = value * 100;
-          
-          let color = "#004400";
-          if (value > 0.05) color = "#00ff99";
-          if (value > 0.5) color = "#ffcc00";
-          if (value > 0.8) color = "#ff0000";
-
-          leds[i].style.height = `${height}%`;
-          leds[i].style.background = color;
-        }
-      }
-
-      requestAnimationFrame(animateVUMeter);
+    function prevSong() {
+      index = (index - 1 + musicas.length) % musicas.length;
+      loadTrack();
+      playSong();
     }
+
+    // Auto avançar quando terminar
+    player.addEventListener("ended", nextSong);
+
+    // Inicializa
+    loadTrack();
   </script>
 </body>
 </html>
-
