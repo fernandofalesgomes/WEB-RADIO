@@ -2,68 +2,69 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Web Rádio Comércio</title>
+  <title>Player GitHub</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #111;
       color: #fff;
       text-align: center;
-      padding: 30px;
+      padding: 50px;
     }
     audio {
       margin-top: 20px;
       width: 80%;
     }
-    #current {
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #0f0;
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
     }
   </style>
 </head>
 <body>
-  <h1>🎶 Minha Web Rádio</h1>
-  <p id="current">Carregando playlist...</p>
-  <audio id="player" controls autoplay></audio>
+  <h1>🎵 Player de Músicas</h1>
+  <audio id="player" controls></audio>
+  <br>
+  <button onclick="prevSong()">⏮️ Anterior</button>
+  <button onclick="nextSong()">⏭️ Próxima</button>
 
   <script>
-    let playlist = [];
+    // Lista de músicas (use os nomes exatos dos arquivos no repositório)
+    const musicas = [
+      "musicas/musica1.mp3",
+      "musicas/musica2.mp3",
+      "musicas/musica3.mp3"
+    ];
+
     let index = 0;
-    const audio = document.getElementById("player");
-    const current = document.getElementById("current");
+    const player = document.getElementById("player");
 
-    // Carrega o arquivo playlist.json
-    fetch("playlist.json?v=" + new Date().getTime()) // força pegar versão nova
-      .then(response => response.json())
-      .then(data => {
-        playlist = data;
-        if (playlist.length > 0) {
-          playSong(0);
-        } else {
-          current.innerText = "Nenhuma música na playlist.";
-        }
-      })
-      .catch(err => {
-        current.innerText = "Erro ao carregar playlist!";
-        console.error(err);
-      });
+    // Carrega a primeira música
+    player.src = musicas[index];
 
-    // Função para tocar uma música
-    function playSong(i) {
-      index = i;
-      audio.src = playlist[index].src;
-      audio.play();
-      current.innerText = "Tocando: " + playlist[index].title;
+    function nextSong() {
+      index = (index + 1) % musicas.length;
+      player.src = musicas[index];
+      player.play();
     }
 
-    // Quando a música termina, toca a próxima
-    audio.addEventListener("ended", () => {
-      index++;
-      if (index >= playlist.length) index = 0; // volta para o início
-      playSong(index);
-    });
+    function prevSong() {
+      index = (index - 1 + musicas.length) % musicas.length;
+      player.src = musicas[index];
+      player.play();
+    }
+
+    // Quando terminar, vai pra próxima
+    player.addEventListener("ended", nextSong);
   </script>
 </body>
 </html>
