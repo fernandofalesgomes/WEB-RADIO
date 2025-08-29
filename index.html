@@ -93,14 +93,15 @@
   </div>
 
   <script>
-    // Lista de URLs de arquivos de áudio
-    // IMPORTANTE: O GitHub não é um servidor de streaming. Se tiver problemas
-    // com a reprodução, é recomendado usar um serviço de hospedagem de arquivos
-    // dedicado ou um servidor web.
+    // IMPORTANTE: Adicione as URLs das suas músicas neste array.
+    // Lembre-se, as URLs devem ser links diretos de áudio (que permitem streaming),
+    // e não links de download (como os do GitHub).
     const musicas = [
-      "https://drive.google.com/file/d/133mvWrwnAotniarkHUvn89OW-sBU0rAh/view?usp=sharing",
-      "https://github.com/fernandofalesgomes/WEB-RADIO/raw/refs/heads/main/00%20-%20aac%20-%20TRILHAS%20ESPORTIVAS%20NOVAS%20(4).aac",
-      "https://github.com/fernandofalesgomes/WEB-RADIO/raw/refs/heads/main/00%20-%20ELETRONICA%20BRITO%20-%20ELETRONICA%20BRITO%20CARIMBO%2001.aac",
+      // Exemplo de uma URL que funciona para streaming:
+      "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      // Adicione suas próprias músicas aqui, por exemplo:
+      // "00 - ELETRONICA BRITO - ELETRONICA BRITO CARIMBO 01.aac",
+      // "https://link-direto.com/outra-musica.aac"
     ];
 
     let index = 0;
@@ -111,15 +112,18 @@
     let audioContext, analyser, source, dataArray;
 
     function initAudioContext() {
+      // Inicia o AudioContext após o primeiro clique do usuário
+      // para evitar problemas com políticas de autoplay do navegador.
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
+        // Aumenta a suavidade da animação do VU meter
         analyser.smoothingTimeConstant = 0.8;
         analyser.fftSize = 64;
         source = audioContext.createMediaElementSource(player);
         source.connect(analyser);
         analyser.connect(audioContext.destination);
-        dataArray = new Uint8Array(analyser.frequencyBinCoun);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
         createVUMeter();
         animateVUMeter();
       }
@@ -134,6 +138,7 @@
       const musicaAtual = musicas[index];
       player.src = musicaAtual;
       
+      // Atualiza o nome da música na tela
       const nomeArquivo = musicaAtual.split('/').pop();
       currentTrackName.textContent = decodeURIComponent(nomeArquivo);
 
@@ -141,6 +146,7 @@
       player.play().then(() => {
         isPlaying = true;
         playBtn.textContent = "⏸️";
+        // Resume o AudioContext para garantir que o som funcione
         if (audioContext.state === 'suspended') {
           audioContext.resume();
         }
@@ -165,11 +171,13 @@
       isPlaying = !isPlaying;
     }
 
+    // Loop infinito da playlist
     player.addEventListener("ended", () => {
       index = (index + 1) % musicas.length;
       loadTrack();
     });
 
+    // Inicia a primeira faixa e o contexto de áudio apenas após o primeiro clique
     playBtn.addEventListener("click", () => {
       initAudioContext();
       if (!isPlaying) {
@@ -216,4 +224,3 @@
   </script>
 </body>
 </html>
-
