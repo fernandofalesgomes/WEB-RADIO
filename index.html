@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Minimalista com VU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎵 Player Simplificado</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -14,34 +15,38 @@
       justify-content: center;
       height: 100vh;
       margin: 0;
+      overflow: hidden;
     }
-
     h1 {
       margin-bottom: 30px;
       font-size: 2rem;
       letter-spacing: 1px;
     }
-
     #player-container {
       background: #1a1a1a;
       padding: 30px 40px;
       border-radius: 20px;
-      box-shadow: 0 0 30px rgba(0,255,150,0.2);
+      box-shadow: 0 0 30px rgba(0, 255, 150, 0.2);
       text-align: center;
       max-width: 400px;
       width: 90%;
     }
-
+    #current-track {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: #00ff99;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     audio {
       display: none;
     }
-
     .controls {
       display: flex;
       justify-content: center;
       margin-top: 20px;
     }
-
     .controls button {
       background: #00ff99;
       border: none;
@@ -50,92 +55,161 @@
       height: 80px;
       font-size: 2rem;
       cursor: pointer;
-      transition: 0.2s;
+      transition: .2s;
       color: #111;
-      box-shadow: 0 0 25px rgba(0,255,150,0.4);
+      box-shadow: 0 0 25px rgba(0, 255, 150, 0.4);
     }
-
     .controls button:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(0,255,150,0.6);
+      box-shadow: 0 0 30px rgba(0, 255, 150, 0.6);
     }
-
-    /* VU Meter */
-    #vu {
+    #vu-container {
       display: flex;
       justify-content: center;
       margin-top: 30px;
       height: 60px;
+      align-items: flex-end;
     }
-
     .led {
       width: 6px;
       height: 100%;
       margin: 0 2px;
       background: #004400;
       border-radius: 2px;
-      transition: height 0.05s, background 0.05s;
+      transition: height .05s, background .05s;
     }
   </style>
 </head>
 <body>
-  <h1>🎵 Player Minimalista</h1>
+  <h1>🎵 Player Simplificado</h1>
 
   <div id="player-container">
-    <audio id="player" src="musica1.mp3" autoplay></audio>
+    <p id="current-track">Nenhuma música carregada</p>
+    <audio id="player"></audio>
     <div class="controls">
-      <button onclick="togglePlay()">▶️/⏸️</button>
+      <button id="play-btn">▶️</button>
     </div>
-    <div id="vu"></div>
+    <div id="vu-container"></div>
   </div>
 
   <script>
+    const musicas = [
+      "musica1.mp3",
+      "musica2.mp3",
+      "musica3.mp3"
+    ];
+
+    let index = 0;
     const player = document.getElementById("player");
-    let isPlaying = true;
+    const playBtn = document.getElementById("play-btn");
+    const currentTrackName = document.getElementById("current-track");
+    let isPlaying = false;
+    let audioContext, analyser, source, dataArray;
+
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.smoothingTimeConstant = 0.8;
+        analyser.fftSize = 64;
+        source = audioContext.createMediaElementSource(player);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        createVUMeter();
+        animateVUMeter();
+      }
+    }
+
+    function loadTrack(playOnLoad = true) {
+      if (musicas.length === 0) {
+        currentTrackName.textContent = "Playlist vazia";
+        return;
+      }
+      
+      const musicaAtual = musicas[index];
+      player.src = musicaAtual;
+      
+      const nomeArquivo = musicaAtual.split('/').pop();
+      currentTrackName.textContent = decodeURIComponent(nomeArquivo);
+
+      player.load();
+      if (playOnLoad) {
+        player.play().then(() => {
+          isPlaying = true;
+          playBtn.textContent = "⏸️";
+          if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+          }
+        }).catch(e => {
+          console.error("Erro ao tentar tocar a música:", e);
+          isPlaying = false;
+          playBtn.textContent = "▶️";
+        });
+      }
+    }
 
     function togglePlay() {
       if (isPlaying) {
         player.pause();
-        isPlaying = false;
+        playBtn.textContent = "▶️";
       } else {
         player.play();
-        isPlaying = true;
+        playBtn.textContent = "⏸️";
+        if (audioContext && audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
       }
+      isPlaying = !isPlaying;
     }
+
+    player.addEventListener("ended", () => {
+      index = (index + 1) % musicas.length;
+      loadTrack();
+    });
+
+    playBtn.addEventListener("click", () => {
+      initAudioContext();
+      if (!isPlaying) {
+        loadTrack();
+      } else {
+        togglePlay();
+      }
+    });
 
     // --- VU meter ---
     const NUM_LEDS = 20;
-    const vu = document.getElementById("vu");
+    const vuContainer = document.getElementById("vu-container");
     const leds = [];
-    for(let i=0; i<NUM_LEDS; i++){
-      const div = document.createElement("div");
-      div.className = "led";
-      vu.appendChild(div);
-      leds.push(div);
-    }
-
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaElementSource(player);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-    analyser.fftSize = 64;
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    function animateVU(){
-      analyser.getByteFrequencyData(dataArray);
-      for(let i=0;i<NUM_LEDS;i++){
-        const value = dataArray[i] / 255;
-        leds[i].style.height = `${value*60}px`;
-        leds[i].style.background = `rgb(${value*0},${value*255},0)`;
+    
+    function createVUMeter() {
+      for (let i = 0; i < NUM_LEDS; i++) {
+        const div = document.createElement("div");
+        div.className = "led";
+        vuContainer.appendChild(div);
+        leds.push(div);
       }
-      requestAnimationFrame(animateVU);
     }
 
-    player.addEventListener("play", () => {
-      if(audioContext.state === "suspended") audioContext.resume();
-      animateVU();
-    });
+    function animateVUMeter() {
+      if (analyser && audioContext.state === 'running') {
+        analyser.getByteFrequencyData(dataArray);
+
+        for (let i = 0; i < NUM_LEDS; i++) {
+          const value = dataArray[i] / 255.0;
+          let height = value * 100;
+          
+          let color = "#004400";
+          if (value > 0.05) color = "#00ff99";
+          if (value > 0.5) color = "#ffcc00";
+          if (value > 0.8) color = "#ff0000";
+
+          leds[i].style.height = `${height}%`;
+          leds[i].style.background = color;
+        }
+      }
+      requestAnimationFrame(animateVUMeter);
+    }
   </script>
 </body>
 </html>
