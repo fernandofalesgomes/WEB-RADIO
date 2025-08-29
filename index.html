@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Moderno</title>
+  <title>Player Profissional com VU</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -40,7 +40,7 @@
     }
 
     audio {
-      display: none; /* Escondemos o player padrão */
+      display: none;
     }
 
     .controls {
@@ -67,6 +67,22 @@
       box-shadow: 0 0 25px rgba(0,255,150,0.6);
     }
 
+    /* VU Meter */
+    #vu {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      height: 60px;
+    }
+
+    .led {
+      width: 6px;
+      height: 100%;
+      margin: 0 2px;
+      background: #004400;
+      border-radius: 2px;
+      transition: height 0.05s, background 0.05s;
+    }
   </style>
 </head>
 <body>
@@ -80,6 +96,7 @@
       <button onclick="togglePlay()">▶️/⏸️</button>
       <button onclick="nextSong()">⏭️</button>
     </div>
+    <div id="vu"></div>
   </div>
 
   <script>
@@ -129,11 +146,4 @@
       playSong();
     }
 
-    // Auto avançar quando terminar
-    player.addEventListener("ended", nextSong);
-
-    // Inicializa
-    loadTrack();
-  </script>
-</body>
-</html>
+    player.addEventListener("ended", nextSong
