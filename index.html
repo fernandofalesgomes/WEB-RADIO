@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Minimalista com VU</title>
+  <title>Player Minimalista com 3 Faixas</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -82,7 +82,7 @@
   <h1>🎵 Player Minimalista</h1>
 
   <div id="player-container">
-    <audio id="player" src="musica1.mp3" autoplay></audio>
+    <audio id="player" autoplay></audio>
     <div class="controls">
       <button onclick="togglePlay()">▶️/⏸️</button>
     </div>
@@ -90,52 +90,33 @@
   </div>
 
   <script>
+    const musicas = ["musica1.mp3", "musica2.mp3", "musica3.mp3"];
+    let index = 0;
     const player = document.getElementById("player");
     let isPlaying = true;
 
+    function loadTrack() {
+      player.src = musicas[index];
+    }
+
+    function playSong() {
+      player.play();
+      isPlaying = true;
+    }
+
+    function pauseSong() {
+      player.pause();
+      isPlaying = false;
+    }
+
     function togglePlay() {
       if (isPlaying) {
-        player.pause();
-        isPlaying = false;
+        pauseSong();
       } else {
-        player.play();
-        isPlaying = true;
+        playSong();
       }
     }
 
-    // --- VU meter ---
-    const NUM_LEDS = 20;
-    const vu = document.getElementById("vu");
-    const leds = [];
-    for(let i=0; i<NUM_LEDS; i++){
-      const div = document.createElement("div");
-      div.className = "led";
-      vu.appendChild(div);
-      leds.push(div);
-    }
-
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaElementSource(player);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-    analyser.fftSize = 64;
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    function animateVU(){
-      analyser.getByteFrequencyData(dataArray);
-      for(let i=0;i<NUM_LEDS;i++){
-        const value = dataArray[i] / 255;
-        leds[i].style.height = `${value*60}px`;
-        leds[i].style.background = `rgb(${value*0},${value*255},0)`;
-      }
-      requestAnimationFrame(animateVU);
-    }
-
-    player.addEventListener("play", () => {
-      if(audioContext.state === "suspended") audioContext.resume();
-      animateVU();
-    });
-  </script>
-</body>
-</html>
+    // Avança automaticamente para a próxima faixa
+    player.addEventListener("ended", () => {
+      index = (i
