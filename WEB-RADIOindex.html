@@ -38,11 +38,11 @@
   <button onclick="nextSong()">⏭️ Próxima</button>
 
   <script>
-    // Lista de músicas (use os nomes exatos dos arquivos no repositório)
+    // Lista de músicas que estão na raiz do repositório
     const musicas = [
-      "musicas/musica1.mp3",
-      "musicas/musica2.mp3",
-      "musicas/musica3.mp3"
+      "musica1.mp3",
+      "musica2.mp3",
+      "musica3.mp3"
     ];
 
     let index = 0;
@@ -63,7 +63,7 @@
       player.play();
     }
 
-    // Quando terminar, vai pra próxima
+    // Quando terminar, toca a próxima
     player.addEventListener("ended", nextSong);
   </script>
 </body>
