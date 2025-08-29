@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Player Minimalista com 3 Faixas</title>
+  <title>Player Minimalista com MP3 e AAC</title>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -60,7 +60,6 @@
       box-shadow: 0 0 30px rgba(0,255,150,0.6);
     }
 
-    /* VU Meter */
     #vu {
       display: flex;
       justify-content: center;
@@ -90,13 +89,33 @@
   </div>
 
   <script>
-    const musicas = ["00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac", "ELETRONICA BRITO CARIMBO 01.mp3", "ELETRONICA BRITO CARIMBO 01.mp3", "00 - aac - TRILHAS ESPORTIVAS NOVAS (4).aac"];
+    // Lista de faixas com extensão MP3 e AAC
+    const musicas = [
+      { mp3: "musica1.mp3", aac: "musica1.aac" },
+      { mp3: "musica2.mp3", aac: "musica2.aac" },
+      { mp3: "musica3.mp3", aac: "musica3.aac" }
+    ];
+
     let index = 0;
     const player = document.getElementById("player");
     let isPlaying = true;
 
     function loadTrack() {
-      player.src = musicas[index];
+      // Limpa fontes existentes
+      player.innerHTML = "";
+      
+      // Adiciona as duas opções
+      const srcMp3 = document.createElement("source");
+      srcMp3.src = musicas[index].mp3;
+      srcMp3.type = "audio/mpeg";
+      player.appendChild(srcMp3);
+
+      const srcAac = document.createElement("source");
+      srcAac.src = musicas[index].aac;
+      srcAac.type = "audio/aac";
+      player.appendChild(srcAac);
+
+      player.load();
     }
 
     function playSong() {
@@ -119,6 +138,47 @@
 
     // Avança automaticamente para a próxima faixa
     player.addEventListener("ended", () => {
-      index = (i
+      index = (index + 1) % musicas.length;
+      loadTrack();
+      playSong();
+    });
 
+    // Inicializa a primeira faixa
+    loadTrack();
 
+    // --- VU meter ---
+    const NUM_LEDS = 20;
+    const vu = document.getElementById("vu");
+    const leds = [];
+    for(let i=0; i<NUM_LEDS; i++){
+      const div = document.createElement("div");
+      div.className = "led";
+      vu.appendChild(div);
+      leds.push(div);
+    }
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaElementSource(player);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+    analyser.fftSize = 64;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function animateVU(){
+      analyser.getByteFrequencyData(dataArray);
+      for(let i=0;i<NUM_LEDS;i++){
+        const value = dataArray[i] / 255;
+        leds[i].style.height = `${value*60}px`;
+        leds[i].style.background = `rgb(${value*0},${value*255},0)`;
+      }
+      requestAnimationFrame(animateVU);
+    }
+
+    player.addEventListener("play", () => {
+      if(audioContext.state === "suspended") audioContext.resume();
+      animateVU();
+    });
+  </script>
+</body>
+</html>
