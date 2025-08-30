@@ -242,49 +242,26 @@
         const shuffleBtn = document.getElementById('shuffle-btn');
         const repeatBtn = document.getElementById('repeat-btn');
 
-        let trackList = [];
+        // IMPORTANTE: Adicione suas músicas aqui!
+        // Altere o "src" para o nome exato do arquivo, incluindo a extensão (.mp3 ou .aac).
+        // Seus arquivos devem estar na mesma pasta que este HTML.
+        let trackList = [
+            { title: 'Nome da Música 1', artist: 'Nome do Artista 1', src: '00 - PROGRAMS DE RADIO - Sites para Radio streaming (1).aac' },
+            { title: 'Nome da Música 2', artist: 'Nome do Artista 2', src: 'nome-da-musica-2.aac' },
+            // Adicione mais músicas aqui
+        ];
+
         let currentTrackIndex = 0;
         let isPlaying = false;
         let isShuffling = false;
 
-        // Função para carregar a lista de músicas
-        async function loadTrackList() {
-            try {
-                const response = await fetch('./');
-                const text = await response.text();
-                const parser = new DOMParser();
-                const htmlDoc = parser.parseFromString(text, 'text/html');
-                
-                const links = Array.from(htmlDoc.querySelectorAll('a'))
-                    .map(link => link.href)
-                    .filter(href => href.endsWith('.mp3') || href.endsWith('.aac'));
-                
-                trackList = links.map(href => {
-                    const filename = href.split('/').pop();
-                    const parts = filename.split('.').slice(0, -1).join('.').split(' - ');
-                    const artist = parts.length > 1 ? parts[0] : 'Artista Desconhecido';
-                    const title = parts.length > 1 ? parts[1] : parts[0];
-                    return {
-                        src: href,
-                        artist: artist,
-                        title: title
-                    };
-                });
-
-                if (trackList.length > 0) {
-                    loadTrack(currentTrackIndex);
-                } else {
-                    trackTitle.textContent = "Nenhuma música encontrada";
-                }
-            } catch (error) {
-                console.error("Erro ao carregar a lista de músicas:", error);
-                trackTitle.textContent = "Erro ao carregar músicas";
-            }
-        }
-
         // Função para carregar e exibir os dados da música
         function loadTrack(index) {
-            if (trackList.length === 0) return;
+            if (trackList.length === 0) {
+                trackTitle.textContent = "Nenhuma música encontrada";
+                trackArtist.textContent = "";
+                return;
+            }
             const track = trackList[index];
             audio.src = track.src;
             trackTitle.textContent = track.title;
@@ -323,7 +300,7 @@
                 currentTrackIndex = (currentTrackIndex + 1) % trackList.length;
             }
             loadTrack(currentTrackIndex);
-            playPauseTrack();
+            if (isPlaying) playPauseTrack(); // Mantém o play se já estiver tocando
         }
 
         // Função para a faixa anterior
@@ -338,15 +315,17 @@
                 currentTrackIndex = (currentTrackIndex - 1 + trackList.length) % trackList.length;
             }
             loadTrack(currentTrackIndex);
-            playPauseTrack();
+            if (isPlaying) playPauseTrack(); // Mantém o play se já estiver tocando
         }
 
         // Atualizar barra de progresso
         audio.addEventListener('timeupdate', () => {
-            const progress = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = `${progress}%`;
-            currentTimeEl.textContent = formatTime(audio.currentTime);
-            durationEl.textContent = formatTime(audio.duration);
+            if (audio.duration) {
+                const progress = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+                currentTimeEl.textContent = formatTime(audio.currentTime);
+                durationEl.textContent = formatTime(audio.duration);
+            }
         });
 
         // Pular a música ao clicar na barra de progresso
@@ -354,7 +333,9 @@
             const width = progressContainer.offsetWidth;
             const clickX = e.offsetX;
             const duration = audio.duration;
-            audio.currentTime = (clickX / width) * duration;
+            if (duration) {
+                audio.currentTime = (clickX / width) * duration;
+            }
         });
 
         // Pular para a próxima música ao terminar
@@ -386,8 +367,6 @@
 
         // Toggle Repeat
         repeatBtn.addEventListener('click', () => {
-            // Apenas para mostrar o estado, a lógica de repetição já é padrão do HTMLAudioElement com ended event.
-            // Aqui ele apenas liga/desliga o modo de repetição de uma única música se for clicado
             audio.loop = !audio.loop;
             repeatBtn.classList.toggle('active', audio.loop);
         });
@@ -397,8 +376,8 @@
         prevBtn.addEventListener('click', prevTrack);
         nextBtn.addEventListener('click', nextTrack);
 
-        // Iniciar carregamento da lista de músicas
-        loadTrackList();
+        // Carregar a primeira faixa quando o player é iniciado
+        loadTrack(currentTrackIndex);
     });
 </script>
 
