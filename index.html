@@ -310,6 +310,7 @@
 
         // Função para a próxima faixa
         function nextTrack() {
+            if (trackList.length === 0) return;
             if (isShuffling) {
                 let newIndex;
                 do {
@@ -320,11 +321,15 @@
                 currentTrackIndex = (currentTrackIndex + 1) % trackList.length;
             }
             loadTrack(currentTrackIndex);
-            if (isPlaying) playPauseTrack(); // Mantém o play se já estiver tocando
+            // Inicia a reprodução se o player já estava tocando
+            if (isPlaying) {
+                audio.play().catch(e => console.error("Erro ao tocar a próxima música:", e));
+            }
         }
 
         // Função para a faixa anterior
         function prevTrack() {
+            if (trackList.length === 0) return;
             if (isShuffling) {
                 let newIndex;
                 do {
@@ -335,7 +340,10 @@
                 currentTrackIndex = (currentTrackIndex - 1 + trackList.length) % trackList.length;
             }
             loadTrack(currentTrackIndex);
-            if (isPlaying) playPauseTrack(); // Mantém o play se já estiver tocando
+            // Inicia a reprodução se o player já estava tocando
+            if (isPlaying) {
+                audio.play().catch(e => console.error("Erro ao tocar a música anterior:", e));
+            }
         }
 
         // Atualizar barra de progresso
@@ -403,5 +411,3 @@
 
 </body>
 </html>
-
-
