@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(to bottom right, #1f2937, #0f172a);
@@ -41,27 +42,6 @@
         #audio-visualizer {
             width: 100%;
             height: 100%;
-        }
-        #album-art-img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 0.5rem;
-            display: none;
-        }
-        #loading-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #3b82f6;
-            font-weight: bold;
-            font-size: 1.25rem;
-            text-shadow: 0 0 5px #3b82f6;
-            display: none;
         }
         .control-button {
             background-color: transparent;
@@ -119,34 +99,15 @@
             background: #3b82f6;
             box-shadow: 0 0 5px #3b82f6;
         }
-        .gemini-button {
-            background-color: #3b82f6;
-            color: #ffffff;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            padding: 0.5rem 1rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .gemini-button:hover {
-            background-color: #5c8cfd;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-3xl font-bold text-white">RÁDIO COMÉRCIO</h1>
+        <h1 class="text-3xl font-bold text-white">Music Player</h1>
         <p class="song-title" id="song-title">Nenhuma música carregada</p>
         
         <div class="visualizer-container">
             <canvas id="audio-visualizer"></canvas>
-            <img id="album-art-img" src="" alt="Capa de Álbum Gerada">
-            <span id="loading-text">Carregando...</span>
         </div>
 
         <div class="flex gap-4 items-center">
@@ -155,11 +116,6 @@
             <button id="play-pause-btn" class="control-button"><i class="fas fa-play"></i></button>
             <button id="repeat-btn" class="control-button"><i class="fas fa-redo"></i></button>
             <button id="next-btn" class="control-button"><i class="fas fa-step-forward"></i></button>
-        </div>
-
-        <div class="flex flex-wrap gap-4 justify-center">
-            <button id="A SUA RÁDIO-btn" class="gemini-button"> A SUA RÁDIO ✨</button>
-            <button id="SUCESSO-btn" class="gemini-button"> SUCESSO ✨</button>
         </div>
         
         <div id="volume-slider-container">
@@ -179,21 +135,19 @@
         const songTitleDisplay = document.getElementById('song-title');
         const canvas = document.getElementById('audio-visualizer');
         const canvasCtx = canvas.getContext('2d');
-        const generateArtBtn = document.getElementById('generate-art-btn');
-        const announceSongBtn = document.getElementById('announce-song-btn');
-        const albumArtImg = document.getElementById('album-art-img');
-        const loadingText = document.getElementById('loading-text');
-
+        
         let audioCtx;
         let analyser;
         let source;
         let audio;
         let isPlaying = false;
         let currentSongIndex = -1;
-        let isShuffling = true; // Modo aleatório ativado por padrão
+        let isShuffling = true;
         let isRepeating = false;
         let shuffledPlaylist = [];
 
+        // IMPORTANTE: Substitua os URLs abaixo pelos links públicos dos seus arquivos no Firebase Storage.
+        // O player suporta formatos como MP3 e AAC.
         const playlist = [
             { title: 'Nome da Música 1', artist: 'Nome do Artista 1', src: '00 - PROGRAMS DE RADIO - Sites para Radio streaming (1).aac' },
             { title: 'Nome da Música 2', artist: 'Nome do Artista 2', src: '00 - PROGRAMS DE RADIO - Sites para Radio streaming (2).aac' },
@@ -259,6 +213,44 @@
             }
         };
 
+        const updateMediaSession = (song) => {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: song.name,
+                    artist: 'Web Rádio',
+                    album: 'Músicas do Firebase'
+                    // Você pode adicionar uma capa aqui, se desejar
+                    // art: [{ src: 'url_da_capa.jpg', sizes: '96x96', type: 'image/jpeg' }]
+                });
+            
+                navigator.mediaSession.setActionHandler('play', () => {
+                    if (audio) {
+                        audio.play();
+                        isPlaying = true;
+                        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                        navigator.mediaSession.playbackState = 'playing';
+                    }
+                });
+            
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    if (audio) {
+                        audio.pause();
+                        isPlaying = false;
+                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                        navigator.mediaSession.playbackState = 'paused';
+                    }
+                });
+            
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    prevSong();
+                });
+            
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    nextSong();
+                });
+            }
+        };
+
         const playSong = (index) => {
             if (index < 0 || index >= playlist.length) {
                 return;
@@ -266,7 +258,7 @@
 
             if (audio) {
                 audio.pause();
-                source.disconnect();
+                if (source) source.disconnect();
             }
 
             currentSongIndex = index;
@@ -289,9 +281,10 @@
                 nextSong();
             };
 
-            // Reset visualizer and hide image on new song
-            albumArtImg.style.display = 'none';
-            canvas.style.display = 'block';
+            updateMediaSession(song);
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+            }
         };
 
         const nextSong = () => {
@@ -348,6 +341,7 @@
             if (isPlaying) {
                 audio.pause();
                 playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                if ('mediaSession' in navigator) { navigator.mediaSession.playbackState = 'paused'; }
             } else {
                 if (!audio) {
                     playSong(0);
@@ -358,6 +352,7 @@
                     audio.play();
                 }
                 playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                if ('mediaSession' in navigator) { navigator.mediaSession.playbackState = 'playing'; }
             }
             isPlaying = !isPlaying;
         });
@@ -391,172 +386,14 @@
         
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isPlaying && audio) {
-                audio.pause();
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                isPlaying = false;
+                // Não faz nada, a Media Session API vai manter o áudio tocando
             }
         });
 
         document.addEventListener('DOMContentLoaded', () => {
             shuffledPlaylist = shuffleArray([...Array(playlist.length).keys()]);
-            // Ativa o botão de shuffle por padrão
             shuffleBtn.classList.add('active');
         });
-
-        // Gemini API integration for generating album art
-        generateArtBtn.addEventListener('click', async () => {
-            if (currentSongIndex === -1) {
-                songTitleDisplay.textContent = "Selecione uma música primeiro.";
-                return;
-            }
-
-            const songName = playlist[currentSongIndex].name.replace('.mp3', '');
-            const prompt = `Uma capa de álbum de música futurista, digital e abstrata, com néon, circuitos e uma estética sci-fi para uma música chamada "${songName}".`;
-            
-            canvas.style.display = 'none';
-            albumArtImg.style.display = 'none';
-            loadingText.style.display = 'block';
-
-            try {
-                const payload = {
-                    instances: { prompt: prompt },
-                    parameters: { "sampleCount": 1}
-                };
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                    const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                    albumArtImg.src = imageUrl;
-                    albumArtImg.style.display = 'block';
-                } else {
-                    songTitleDisplay.textContent = "Erro ao gerar a capa.";
-                    canvas.style.display = 'block';
-                }
-            } catch (error) {
-                console.error("Erro ao chamar a API Gemini:", error);
-                songTitleDisplay.textContent = "Erro de conexão ou API.";
-                canvas.style.display = 'block';
-            } finally {
-                loadingText.style.display = 'none';
-            }
-        });
-
-        // Gemini API integration for announcing the song
-        announceSongBtn.addEventListener('click', async () => {
-            if (currentSongIndex === -1) {
-                songTitleDisplay.textContent = "Selecione uma música primeiro.";
-                return;
-            }
-
-            const songName = playlist[currentSongIndex].name.replace('.mp3', '');
-            const prompt = `Alerta de faixa. Agora a ser reproduzida: "${songName}". Prepare-se para o futuro da música.`;
-            
-            try {
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: {
-                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Iapetus" } }
-                        }
-                    },
-                    model: "gemini-2.5-flash-preview-tts"
-                };
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                const part = result?.candidates?.[0]?.content?.parts?.[0];
-                const audioData = part?.inlineData?.data;
-                const mimeType = part?.inlineData?.mimeType;
-
-                if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
-                    const pcmData = base64ToArrayBuffer(audioData);
-                    const pcm16 = new Int16Array(pcmData);
-                    const wavBlob = pcmToWav(pcm16, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
-                    const audioElem = new Audio(audioUrl);
-                    audioElem.play();
-                } else {
-                    songTitleDisplay.textContent = "Erro ao gerar áudio.";
-                }
-            } catch (error) {
-                console.error("Erro ao chamar a API Gemini:", error);
-                songTitleDisplay.textContent = "Erro de conexão ou API.";
-            }
-        });
-
-        // Helper functions for TTS
-        function base64ToArrayBuffer(base64) {
-            const binaryString = atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
-
-        function pcmToWav(pcm16, sampleRate) {
-            const dataLength = pcm16.length * 2;
-            const buffer = new ArrayBuffer(44 + dataLength);
-            const view = new DataView(buffer);
-            let offset = 0;
-
-            function writeString(str) {
-                for (let i = 0; i < str.length; i++) {
-                    view.setUint8(offset++, str.charCodeAt(i));
-                }
-            }
-
-            function writeUint32(val) {
-                view.setUint32(offset, val, true);
-                offset += 4;
-            }
-
-            function writeUint16(val) {
-                view.setUint16(offset, val, true);
-                offset += 2;
-            }
-
-            writeString('RIFF');
-            writeUint32(36 + dataLength);
-            writeString('WAVE');
-            writeString('fmt ');
-            writeUint32(16);
-            writeUint16(1); // PCM
-            writeUint16(1); // Mono
-            writeUint32(sampleRate);
-            writeUint32(sampleRate * 2); // Byte rate
-            writeUint16(2); // Block align
-            writeUint16(16); // Bits per sample
-            writeString('data');
-            writeUint32(dataLength);
-
-            for (let i = 0; i < pcm16.length; i++) {
-                view.setInt16(offset, pcm16[i], true);
-                offset += 2;
-            }
-
-            return new Blob([view], { type: 'audio/wav' });
-        }
     </script>
 </body>
 </html>
-
-
