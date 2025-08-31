@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reprodutor de Música para GitHub</title>
+    <title>Reprodutor de Música Futurista</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c;
+            background: linear-gradient(to bottom right, #1f2937, #0f172a);
             color: #e2e8f0;
             display: flex;
             justify-content: center;
@@ -18,68 +18,123 @@
             padding: 1rem;
         }
         .container {
-            background-color: #2d3748;
+            background-color: #111827;
             border-radius: 1rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-            padding: 2rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            padding: 2.5rem;
             width: 100%;
-            max-width: 28rem;
+            max-width: 30rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 1.5rem;
+            border: 2px solid #3b82f6;
+        }
+        .visualizer-container {
+            width: 100%;
+            height: 160px;
+            background-color: #0f172a;
+            border: 1px solid #3b82f6;
+            border-radius: 0.5rem;
+            position: relative;
         }
         #audio-visualizer {
             width: 100%;
-            height: 150px;
-            background-color: #1a202c;
+            height: 100%;
+        }
+        #album-art-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             border-radius: 0.5rem;
+            display: none;
+        }
+        #loading-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #3b82f6;
+            font-weight: bold;
+            font-size: 1.25rem;
+            text-shadow: 0 0 5px #3b82f6;
+            display: none;
         }
         .control-button {
             background-color: transparent;
-            border: none;
-            color: #e2e8f0;
+            border: 2px solid #6b7280;
+            color: #9ca3af;
             font-size: 1.5rem;
             padding: 0.5rem;
+            border-radius: 0.5rem;
             cursor: pointer;
-            transition: color 0.3s, transform 0.2s;
+            transition: color 0.3s, background-color 0.3s;
         }
         .control-button:hover {
-            color: #63b3ed;
-            transform: scale(1.1);
+            color: #ffffff;
+            background-color: #3b82f6;
+            border-color: #3b82f6;
         }
         .control-button:disabled {
-            color: #718096;
+            color: #4b5563;
+            background-color: transparent;
+            border-color: #4b5563;
             cursor: not-allowed;
-            transform: none;
         }
         .control-button.active {
-            color: #63b3ed;
+            background-color: #3b82f6;
+            color: #ffffff;
+            border-color: #3b82f6;
         }
         #play-pause-btn {
-            background-color: #63b3ed;
-            color: #1a202c;
+            background-color: #3b82f6;
+            color: #ffffff;
             border-radius: 9999px;
             font-size: 1.25rem;
-            width: 3rem;
-            height: 3rem;
+            width: 3.5rem;
+            height: 3.5rem;
             display: flex;
             justify-content: center;
             align-items: center;
+            border: none;
         }
         .song-title {
             text-align: center;
             font-size: 1.25rem;
             font-weight: bold;
-            color: #cbd5e0;
+            color: #c9d1d9;
             min-height: 1.5rem;
+            text-shadow: 0 0 5px #3b82f6;
         }
-        /* Garantir que o controlo de volume é sempre visível */
         #volume-slider-container {
             width: 100%;
             display: flex !important;
             align-items: center !important;
             gap: 0.5rem !important;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            background: #3b82f6;
+            box-shadow: 0 0 5px #3b82f6;
+        }
+        .gemini-button {
+            background-color: #3b82f6;
+            color: #ffffff;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .gemini-button:hover {
+            background-color: #5c8cfd;
         }
     </style>
 </head>
@@ -87,9 +142,13 @@
     <div class="container">
         <h1 class="text-3xl font-bold text-white">RÁDIO COMÉRCIO</h1>
         <p class="song-title" id="song-title">Nenhuma música carregada</p>
-        <canvas id="audio-visualizer"></canvas>
         
-        <!-- Controles do Reprodutor -->
+        <div class="visualizer-container">
+            <canvas id="audio-visualizer"></canvas>
+            <img id="album-art-img" src="" alt="Capa de Álbum Gerada">
+            <span id="loading-text">Carregando...</span>
+        </div>
+
         <div class="flex gap-4 items-center">
             <button id="prev-btn" class="control-button"><i class="fas fa-step-backward"></i></button>
             <button id="shuffle-btn" class="control-button"><i class="fas fa-random"></i></button>
@@ -97,8 +156,12 @@
             <button id="repeat-btn" class="control-button"><i class="fas fa-redo"></i></button>
             <button id="next-btn" class="control-button"><i class="fas fa-step-forward"></i></button>
         </div>
+
+        <div class="flex flex-wrap gap-4 justify-center">
+            <button id="generate-art-btn" class="gemini-button">Gerar Capa ✨</button>
+            <button id="announce-song-btn" class="gemini-button">Anunciar Música ✨</button>
+        </div>
         
-        <!-- Controlo de Volume -->
         <div id="volume-slider-container">
             <i class="fas fa-volume-down text-lg text-gray-400"></i>
             <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -116,6 +179,10 @@
         const songTitleDisplay = document.getElementById('song-title');
         const canvas = document.getElementById('audio-visualizer');
         const canvasCtx = canvas.getContext('2d');
+        const generateArtBtn = document.getElementById('generate-art-btn');
+        const announceSongBtn = document.getElementById('announce-song-btn');
+        const albumArtImg = document.getElementById('album-art-img');
+        const loadingText = document.getElementById('loading-text');
 
         let audioCtx;
         let analyser;
@@ -123,12 +190,10 @@
         let audio;
         let isPlaying = false;
         let currentSongIndex = -1;
-        let isShuffling = false;
+        let isShuffling = true; // Modo aleatório ativado por padrão
         let isRepeating = false;
         let shuffledPlaylist = [];
 
-        // ******** PARA USAR AS TUAS MÚSICAS, ALTERA ESTA LISTA! ********
-        // Apenas edita os nomes dos arquivos. Certifica-te que os arquivos estão na mesma pasta.
         const playlist = [
             { title: 'Nome da Música 1', artist: 'Nome do Artista 1', src: '00 - PROGRAMS DE RADIO - Sites para Radio streaming (1).aac' },
             { title: 'Nome da Música 2', artist: 'Nome do Artista 2', src: '00 - PROGRAMS DE RADIO - Sites para Radio streaming (2).aac' },
@@ -151,9 +216,7 @@
             { title: 'love songs', artist: 'Fernanda locutora', src: '00 - PROGRAMS DE RADIO - love songs.aac' },
             { title: 'toca tudo', artist: 'Locutor', src: '00 - PROGRAMS DE RADIO - toca tudo2.aac' }
         ];
-        // ***************************************************************
 
-        // Função para redimensionar o canvas e mantê-lo responsivo
         const resizeCanvas = () => {
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
@@ -162,7 +225,6 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Inicializa o contexto de áudio e o analisador
         const initializeAudioContext = () => {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -171,7 +233,6 @@
                 const bufferLength = analyser.frequencyBinCount;
                 const dataArray = new Uint8Array(bufferLength);
                 
-                // Função para desenhar o visualizador
                 function draw() {
                     requestAnimationFrame(draw);
                     if (!analyser || !dataArray) return;
@@ -198,7 +259,6 @@
             }
         };
 
-        // Inicia a reprodução de uma música da lista
         const playSong = (index) => {
             if (index < 0 || index >= playlist.length) {
                 return;
@@ -214,7 +274,7 @@
             
             audio = new Audio(song.src);
             audio.crossOrigin = "anonymous";
-            audio.volume = volumeSlider.value; // Define o volume inicial
+            audio.volume = volumeSlider.value;
             
             source = audioCtx.createMediaElementSource(audio);
             source.connect(analyser);
@@ -228,9 +288,12 @@
             audio.onended = () => {
                 nextSong();
             };
+
+            // Reset visualizer and hide image on new song
+            albumArtImg.style.display = 'none';
+            canvas.style.display = 'block';
         };
 
-        // Toca a próxima música na lista
         const nextSong = () => {
             if (isRepeating) {
                 playSong(currentSongIndex);
@@ -248,13 +311,12 @@
             } else {
                 nextIndex = currentSongIndex + 1;
                 if (nextIndex >= playlist.length) {
-                    nextIndex = 0; // Volta para o início da lista
+                    nextIndex = 0;
                 }
                 playSong(nextIndex);
             }
         };
 
-        // Toca a música anterior na lista
         const prevSong = () => {
             let prevIndex;
             if (isShuffling) {
@@ -273,7 +335,6 @@
             }
         };
 
-        // Algoritmo de Fisher-Yates para embaralhar um array
         const shuffleArray = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -282,7 +343,6 @@
             return array;
         };
 
-        // Listeners para os botões de controle
         playPauseBtn.addEventListener('click', () => {
             initializeAudioContext();
             if (isPlaying) {
@@ -290,7 +350,7 @@
                 playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             } else {
                 if (!audio) {
-                    playSong(0); // Toca a primeira música se nenhuma estiver a tocar
+                    playSong(0);
                 } else {
                     if (audioCtx.state === 'suspended') {
                         audioCtx.resume();
@@ -329,7 +389,6 @@
             }
         });
         
-        // Pausa a música quando a página não está visível
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isPlaying && audio) {
                 audio.pause();
@@ -338,11 +397,164 @@
             }
         });
 
-        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             shuffledPlaylist = shuffleArray([...Array(playlist.length).keys()]);
+            // Ativa o botão de shuffle por padrão
+            shuffleBtn.classList.add('active');
         });
+
+        // Gemini API integration for generating album art
+        generateArtBtn.addEventListener('click', async () => {
+            if (currentSongIndex === -1) {
+                songTitleDisplay.textContent = "Selecione uma música primeiro.";
+                return;
+            }
+
+            const songName = playlist[currentSongIndex].name.replace('.mp3', '');
+            const prompt = `Uma capa de álbum de música futurista, digital e abstrata, com néon, circuitos e uma estética sci-fi para uma música chamada "${songName}".`;
+            
+            canvas.style.display = 'none';
+            albumArtImg.style.display = 'none';
+            loadingText.style.display = 'block';
+
+            try {
+                const payload = {
+                    instances: { prompt: prompt },
+                    parameters: { "sampleCount": 1}
+                };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                    const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    albumArtImg.src = imageUrl;
+                    albumArtImg.style.display = 'block';
+                } else {
+                    songTitleDisplay.textContent = "Erro ao gerar a capa.";
+                    canvas.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Erro ao chamar a API Gemini:", error);
+                songTitleDisplay.textContent = "Erro de conexão ou API.";
+                canvas.style.display = 'block';
+            } finally {
+                loadingText.style.display = 'none';
+            }
+        });
+
+        // Gemini API integration for announcing the song
+        announceSongBtn.addEventListener('click', async () => {
+            if (currentSongIndex === -1) {
+                songTitleDisplay.textContent = "Selecione uma música primeiro.";
+                return;
+            }
+
+            const songName = playlist[currentSongIndex].name.replace('.mp3', '');
+            const prompt = `Alerta de faixa. Agora a ser reproduzida: "${songName}". Prepare-se para o futuro da música.`;
+            
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Iapetus" } }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    const audioElem = new Audio(audioUrl);
+                    audioElem.play();
+                } else {
+                    songTitleDisplay.textContent = "Erro ao gerar áudio.";
+                }
+            } catch (error) {
+                console.error("Erro ao chamar a API Gemini:", error);
+                songTitleDisplay.textContent = "Erro de conexão ou API.";
+            }
+        });
+
+        // Helper functions for TTS
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16, sampleRate) {
+            const dataLength = pcm16.length * 2;
+            const buffer = new ArrayBuffer(44 + dataLength);
+            const view = new DataView(buffer);
+            let offset = 0;
+
+            function writeString(str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset++, str.charCodeAt(i));
+                }
+            }
+
+            function writeUint32(val) {
+                view.setUint32(offset, val, true);
+                offset += 4;
+            }
+
+            function writeUint16(val) {
+                view.setUint16(offset, val, true);
+                offset += 2;
+            }
+
+            writeString('RIFF');
+            writeUint32(36 + dataLength);
+            writeString('WAVE');
+            writeString('fmt ');
+            writeUint32(16);
+            writeUint16(1); // PCM
+            writeUint16(1); // Mono
+            writeUint32(sampleRate);
+            writeUint32(sampleRate * 2); // Byte rate
+            writeUint16(2); // Block align
+            writeUint16(16); // Bits per sample
+            writeString('data');
+            writeUint32(dataLength);
+
+            for (let i = 0; i < pcm16.length; i++) {
+                view.setInt16(offset, pcm16[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
     </script>
 </body>
 </html>
-
