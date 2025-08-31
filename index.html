@@ -146,8 +146,10 @@
         let isRepeating = false;
         let shuffledPlaylist = [];
 
-        // IMPORTANTE: Substitua os URLs abaixo pelos links públicos dos seus arquivos no Firebase Storage.
-        // O player suporta formatos como MP3 e AAC.
+        // IMPORTANTE: Substitua os URLs abaixo pelos links RAW do seu repositório no GitHub.
+        // 1. Faça o upload dos seus arquivos de música para um repositório no GitHub.
+        // 2. Clique no arquivo para ver seu conteúdo e depois clique no botão "Raw" (Bruto).
+        // 3. Copie a URL que aparece na barra de endereços do navegador. Essa é a URL que você deve usar aqui.
         const playlist = [
             { title: 'Nome da Música 1', artist: 'Nome do Artista 1', src: '00 - PROGRAMS DE RADIO - Sites para Radio streaming (1).aac' },
             { title: 'Nome da Música 2', artist: 'Nome do Artista 2', src: '00 - PROGRAMS DE RADIO - Sites para Radio streaming (2).aac' },
@@ -218,9 +220,7 @@
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: song.name,
                     artist: 'Web Rádio',
-                    album: 'Músicas do Firebase'
-                    // Você pode adicionar uma capa aqui, se desejar
-                    // art: [{ src: 'url_da_capa.jpg', sizes: '96x96', type: 'image/jpeg' }]
+                    album: 'Músicas do GitHub'
                 });
             
                 navigator.mediaSession.setActionHandler('play', () => {
