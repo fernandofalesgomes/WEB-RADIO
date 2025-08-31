@@ -74,6 +74,13 @@
             color: #cbd5e0;
             min-height: 1.5rem;
         }
+        /* Garantir que o controlo de volume é sempre visível */
+        #volume-slider-container {
+            width: 100%;
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+        }
     </style>
 </head>
 <body>
@@ -82,7 +89,7 @@
         <p class="song-title" id="song-title">Nenhuma música carregada</p>
         <canvas id="audio-visualizer"></canvas>
         
-        <!-- Player Controls -->
+        <!-- Controles do Reprodutor -->
         <div class="flex gap-4 items-center">
             <button id="prev-btn" class="control-button"><i class="fas fa-step-backward"></i></button>
             <button id="shuffle-btn" class="control-button"><i class="fas fa-random"></i></button>
@@ -91,8 +98,8 @@
             <button id="next-btn" class="control-button"><i class="fas fa-step-forward"></i></button>
         </div>
         
-        <!-- Volume Control -->
-        <div class="flex items-center gap-2 w-full mt-4">
+        <!-- Controlo de Volume -->
+        <div id="volume-slider-container">
             <i class="fas fa-volume-down text-lg text-gray-400"></i>
             <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <i class="fas fa-volume-up text-lg text-gray-400"></i>
