@@ -90,6 +90,13 @@
             <button id="repeat-btn" class="control-button"><i class="fas fa-redo"></i></button>
             <button id="next-btn" class="control-button"><i class="fas fa-step-forward"></i></button>
         </div>
+        
+        <!-- Volume Control -->
+        <div class="flex items-center gap-2 w-full mt-4">
+            <i class="fas fa-volume-down text-lg text-gray-400"></i>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-volume-up text-lg text-gray-400"></i>
+        </div>
     </div>
 
     <script>
@@ -98,6 +105,7 @@
         const nextBtn = document.getElementById('next-btn');
         const shuffleBtn = document.getElementById('shuffle-btn');
         const repeatBtn = document.getElementById('repeat-btn');
+        const volumeSlider = document.getElementById('volume-slider');
         const songTitleDisplay = document.getElementById('song-title');
         const canvas = document.getElementById('audio-visualizer');
         const canvasCtx = canvas.getContext('2d');
@@ -136,7 +144,7 @@
             { title: 'love songs', artist: 'Fernanda locutora', src: '00 - PROGRAMS DE RADIO - love songs.aac' },
             { title: 'toca tudo', artist: 'Locutor', src: '00 - PROGRAMS DE RADIO - toca tudo2.aac' }
         ];
-        // ***************************************************************// Adicione mais músicas aqui
+        // ***************************************************************
 
         // Função para redimensionar o canvas e mantê-lo responsivo
         const resizeCanvas = () => {
@@ -199,6 +207,7 @@
             
             audio = new Audio(song.src);
             audio.crossOrigin = "anonymous";
+            audio.volume = volumeSlider.value; // Define o volume inicial
             
             source = audioCtx.createMediaElementSource(audio);
             source.connect(analyser);
@@ -268,12 +277,12 @@
 
         // Listeners para os botões de controle
         playPauseBtn.addEventListener('click', () => {
+            initializeAudioContext();
             if (isPlaying) {
                 audio.pause();
                 playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             } else {
                 if (!audio) {
-                    initializeAudioContext();
                     playSong(0); // Toca a primeira música se nenhuma estiver a tocar
                 } else {
                     if (audioCtx.state === 'suspended') {
@@ -304,6 +313,12 @@
             if (isRepeating) {
                 isShuffling = false;
                 shuffleBtn.classList.remove('active');
+            }
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            if (audio) {
+                audio.volume = e.target.value;
             }
         });
         
