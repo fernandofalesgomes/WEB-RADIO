@@ -1,405 +1,366 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reprodutor de Música Futurista</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>ELETRÔNICA BRITO</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom right, #1f2937, #0f172a);
-            color: #e2e8f0;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
+            padding: 20px;
         }
-        .container {
-            background-color: #111827;
-            border-radius: 1rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-            padding: 2.5rem;
-            width: 100%;
-            max-width: 30rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            border: 2px solid #3b82f6;
-        }
-        .visualizer-container {
-            width: 100%;
-            height: 160px;
-            background-color: #0f172a;
-            border: 1px solid #3b82f6;
-            border-radius: 0.5rem;
-            position: relative;
-        }
-        #audio-visualizer {
-            width: 100%;
-            height: 100%;
-        }
-        .control-button {
-            background-color: transparent;
-            border: 2px solid #6b7280;
-            color: #9ca3af;
-            font-size: 1.5rem;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: color 0.3s, background-color 0.3s;
-        }
-        .control-button:hover {
-            color: #ffffff;
-            background-color: #3b82f6;
-            border-color: #3b82f6;
-        }
-        .control-button:disabled {
-            color: #4b5563;
-            background-color: transparent;
-            border-color: #4b5563;
-            cursor: not-allowed;
-        }
-        .control-button.active {
-            background-color: #3b82f6;
-            color: #ffffff;
-            border-color: #3b82f6;
-        }
-        #play-pause-btn {
-            background-color: #3b82f6;
-            color: #ffffff;
-            border-radius: 9999px;
-            font-size: 1.25rem;
-            width: 3.5rem;
-            height: 3.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: none;
-        }
-        .song-title {
+        
+        .player-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            color: white;
             text-align: center;
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #c9d1d9;
-            min-height: 1.5rem;
-            text-shadow: 0 0 5px #3b82f6;
         }
-        #volume-slider-container {
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #fdbb2d;
+            font-size: 24px;
+        }
+        
+        .album-art {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, #1a2a6c, #b21f1f);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 5px solid #fff;
+            animation: rotate 20s linear infinite;
+            animation-play-state: paused;
+        }
+        
+        .album-art.play {
+            animation-play-state: running;
+        }
+        
+        @keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .album-art .radio-icon {
+            font-size: 60px;
+            color: white;
+        }
+        
+        .track-info {
+            margin-bottom: 20px;
+            height: 80px;
+        }
+        
+        .status {
+            font-size: 18px;
+            color: #fdbb2d;
+            margin-bottom: 20px;
+        }
+        
+        .vu-meter {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 25px;
+            height: 30px;
+            align-items: flex-end;
+        }
+        
+        .led {
+            width: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            transition: background-color 0.1s;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 15px;
+        }
+        
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #fdbb2d;
+            border: none;
+            color: #000;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.1);
+            background-color: #ffcc44;
+        }
+        
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .volume-icon {
+            color: #fdbb2d;
+            font-size: 20px;
+        }
+        
+        .volume-slider {
+            -webkit-appearance: none;
             width: 100%;
-            display: flex !important;
-            align-items: center !important;
-            gap: 0.5rem !important;
+            height: 5px;
+            background: #444;
+            border-radius: 5px;
+            outline: none;
         }
-        input[type="range"]::-webkit-slider-thumb {
-            background: #3b82f6;
-            box-shadow: 0 0 5px #3b82f6;
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #fdbb2d;
+            cursor: pointer;
+        }
+        
+        .random-indicator {
+            font-size: 14px;
+            color: #fdbb2d;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-3xl font-bold text-white">A SUA RÁDIO</h1>
-        <p class="song-title" id="song-title">Nenhuma música carregada</p>
+    <div class="player-container">
+        <h1>ELETRÔNICA BRITO</h1>
         
-        <div class="visualizer-container">
-            <canvas id="audio-visualizer"></canvas>
-        </div>
-
-        <div class="flex gap-4 items-center">
-            <button id="prev-btn" class="control-button"><i class="fas fa-step-backward"></i></button>
-            <button id="shuffle-btn" class="control-button"><i class="fas fa-random"></i></button>
-            <button id="play-pause-btn" class="control-button"><i class="fas fa-play"></i></button>
-            <button id="repeat-btn" class="control-button"><i class="fas fa-redo"></i></button>
-            <button id="next-btn" class="control-button"><i class="fas fa-step-forward"></i></button>
+        <div class="album-art">
+            <div class="radio-icon">📻</div>
         </div>
         
-        <div id="volume-slider-container">
-            <i class="fas fa-volume-down text-lg text-gray-400"></i>
-            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <i class="fas fa-volume-up text-lg text-gray-400"></i>
+        <div class="track-info">
+            <div class="status">Pronto para tocar</div>
         </div>
+        
+        <div class="vu-meter">
+            <div class="led"></div>
+            <div class="led"></div>
+            <div class="led"></div>
+            <div class="led"></div>
+            <div class="led"></div>
+            <div class="led"></div>
+            <div class="led"></div>
+            <div class="led"></div>
+            <div class="led"></div>
+            <div class="led"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="play-btn" id="playBtn">▶</button>
+        </div>
+        
+        <div class="volume-container">
+            <div class="volume-icon">🔈</div>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.7">
+            <div class="volume-icon">🔊</div>
+        </div>
+        
+        <div class="random-indicator">SUCESSO</div>
     </div>
 
     <script>
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const shuffleBtn = document.getElementById('shuffle-btn');
-        const repeatBtn = document.getElementById('repeat-btn');
-        const volumeSlider = document.getElementById('volume-slider');
-        const songTitleDisplay = document.getElementById('song-title');
-        const canvas = document.getElementById('audio-visualizer');
-        const canvasCtx = canvas.getContext('2d');
-        
-        let audioCtx;
-        let analyser;
-        let source;
-        let audio;
-        let isPlaying = false;
-        let currentSongIndex = -1;
-        let isShuffling = true;
-        let isRepeating = false;
-        let shuffledPlaylist = [];
-
-        // IMPORTANTE: Substitua os URLs abaixo pelos links RAW do seu repositório no GitHub.
-        // 1. Faça o upload dos seus arquivos de música para um repositório no GitHub.
-        // 2. Clique no arquivo para ver seu conteúdo e depois clique no botão "Raw" (Bruto).
-        // 3. Copie a URL que aparece na barra de endereços do navegador. Essa é a URL que você deve usar aqui.
-        const playlist = [
-            { title: 'Nome da Música 1', artist: 'Nome do Artista 1', src: '00 - CHEGA JUNTO - PREFIXO COMERAIL PONTE LOC  LISTA ATE 72 2 H 10 M.aac' },
-            { title: 'Nome da Música 2', artist: 'Nome do Artista 2', src: '00 - CHEGA JUNTO - PREFIXO COMERAIL PONTE LOC  LISTA ATE 72 A 75 RESTANTE 2 H 16 M.aac' },
-            { title: 'Nome da Música 3', artist: 'Nome do Artista 3', src: '00 - CHEGA JUNTO - PREFIXO COMERAIL PONTE LOC  LISTA ATE 75 A FINAL.aac' },
-            { title: 'Nome da Música 4', artist: 'Nome do Artista 4', src: '00 - FORRO DA MELHOR 01 SELECAO DAS ANTIGAS - 50.mp3.aac' },
-            { title: 'Nome da Música 5', artist: 'Nome do Artista 5', src: '00 - PROGRAMAS INTEIROS - CONEXAO TOTAL MPB CLASSICOS ELETRONICA BRITO.aac' },
-            { title: 'Nome da Música 6', artist: 'Nome do Artista 6', src: '00 - PROGRAMAS INTEIROS - CONEXAO TOTAL ROM INTERN ELETRONICA BRITO.aac' },
-            { title: 'Nome da Música 7', artist: 'Nome do Artista 7', src: '00 - PROGRAMAS INTEIROS - CONEXAO TOTAL SERTANEJO ATE 40 FAIXAS 06 05 2025.aac' },
-            { title: 'Nome da Música 8', artist: 'Nome do Artista 8', src: '00 - PROGRAMAS INTEIROS - CONEXAO TOTAL SERTANEJO POS 40 FAIXAS 06 05 2025.aac' },
-            { title: 'Nome da Música 9', artist: 'Nome do Artista 9', src: '00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS  MATRUZ COM LEITE ALO VELHO DOS COCOS.aac' },
-            { title: 'Nome da Música 10', artist: 'Nome do Artista 10', src: '00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS MASTRUZ ALO PRO VELHOS DOS CVOCOS E MAIS PESSOAS 02.aac' },
-            { title: 'Nome da Música 11', artist: 'Nome do Artista 11', src: '00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS MASTRUZ ALO PRO VELHOS DOS CVOCOS E MAIS PESSOAS 03.aac' },
-            { title: 'Nome da Música 12', artist: 'Nome do Artista 12', src: '00 - PROGRAMAS INTEIROS - VIAJEM MUSICAL 01 cesar mpb pasta com nomes  todas as 35  primeiras.aac' },
-            { title: 'Nome da Música 13', artist: 'Nome do Artista 13', src: '00 - PROGRAMAS INTEIROS - VIAJEM MUSICAL 02 cesar mpb 35  DEPOIS DAS 70 Primeiras ANA PAR RL WEB RADIO.aac' },
-            { title: 'Nome da Música 14', artist: 'Nome do Artista 14', src: '00 - PROGRAMAS INTEIROS - VIAJEM MUSICAL 03 cesar mpb pasta com nomes  todas DE 35 A 70  primeiras~1.aac' },
-            { title: 'Nome da Música 15', artist: 'Nome do Artista 15', src: '15 - FORRO DA MELHOR 03 Forro 2018 - os melhores do ano 1. SÓ INICIO DA 2.aac' },
-            { title: 'Nome da Música 16', artist: 'Nome do Artista 16', src: '81 - FORRO DA MELHOR 02 FORRO 2023 - 81.aac' },
-            { title: 'Nome da Música 17', artist: 'Nome do Artista 17', src: '15 - FORRO DA MELHOR 03 Forro 2018 - os melhores do ano 1. SÓ INICIO DA 2.aac' },
-            { title: 'Nome da Música 18', artist: 'Nome do Artista 18', src: '81 - FORRO DA MELHOR 02 FORRO 2023 - 81.aac' },
-            { title: 'Nome da Música 19', artist: 'Nome do Artista 19', src: '00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS MASTRUZ ALO PRO VELHOS DOS CVOCOS E MAIS PESSOAS 03.aac' },
-            { title: 'Nome da Música 20', artist: 'Nome do Artista 20', src: '00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS MASTRUZ ALO PRO VELHOS DOS CVOCOS E MAIS PESSOAS 02.aac' },
-            { title: 'Nome da Música 21', artist: 'Nome do Artista 21', src: '00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS  MATRUZ COM LEITE ALO VELHO DOS COCOS.aac' }           
-        ];
-
-        const resizeCanvas = () => {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-        };
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        const initializeAudioContext = () => {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 256;
-                const bufferLength = analyser.frequencyBinCount;
-                const dataArray = new Uint8Array(bufferLength);
-                
-                function draw() {
-                    requestAnimationFrame(draw);
-                    if (!analyser || !dataArray) return;
-
-                    analyser.getByteFrequencyData(dataArray);
-
-                    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-
-                    const barWidth = (canvas.width / bufferLength) * 2.5;
-                    let x = 0;
-
-                    for(let i = 0; i < bufferLength; i++) {
-                        const barHeight = dataArray[i];
-                        const r = barHeight + (25 * (i/bufferLength));
-                        const g = 250 * (i/bufferLength);
-                        const b = 50;
-                        
-                        canvasCtx.fillStyle = `rgb(${r},${g},${b})`;
-                        canvasCtx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-                        x += barWidth + 1;
-                    }
-                }
-                draw();
-            }
-        };
-
-        const updateMediaSession = (song) => {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: song.name,
-                    artist: 'Web Rádio',
-                    album: 'Músicas do GitHub'
-                });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lista de arquivos de áudio - substitua com os nomes dos seus arquivos
+            const audioFiles = [
+                '00 - ELETRONICA BRITO - ELETRONICA BRITO COMERCIAL VOZ DE IMPACTO.aac',
+				'00 - FORRO DA MELHOR 01 SELECAO DAS ANTIGAS - 50.mp3.aac',
+				'00 - ELETRONICA BRITO - ELETRONICA BRITO COMERCIAL FEM 02.aac',
+				'00 - PROGRAMAS INTEIROS - CONEXAO TOTAL MPB CLASSICOS ELETRONICA BRITO.aac',
+				'00 - ELETRONICA BRITO - ELETRONICA BRITO COMERCIAL FEM 01.aac',
+				'00 - PROGRAMAS INTEIROS - CONEXAO TOTAL ROM INTERN ELETRONICA BRITO.aac',
+				'00 - PROGRAMAS INTEIROS - CONEXAO TOTAL SERTANEJO ATE 40 FAIXAS 06 05 2025.aac',
+				'00 - PROGRAMAS INTEIROS - CONEXAO TOTAL SERTANEJO POS 40 FAIXAS 06 05 2025.aac',
+				'00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS  MATRUZ COM LEITE ALO VELHO DOS COCOS.aac',
+				'00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS MASTRUZ ALO PRO VELHOS DOS CVOCOS E MAIS PESSOAS 02.aac',
+				'00 - PROGRAMAS INTEIROS - FORRO A MELHOR SELECAO DAS ANTIGAS MASTRUZ ALO PRO VELHOS DOS CVOCOS E MAIS PESSOAS 03.aac',
+				'00 - PROGRAMAS INTEIROS - VIAJEM MUSICAL 01 cesar mpb pasta com nomes  todas as 35  primeiras.aac',
+				'00 - PROGRAMAS INTEIROS - VIAJEM MUSICAL 02 cesar mpb 35  DEPOIS DAS 70 Primeiras ANA PAR RL WEB RADIO.aac',
+				'00 - PROGRAMAS INTEIROS - VIAJEM MUSICAL 03 cesar mpb pasta com nomes  todas DE 35 A 70  primeiras~1.aac',
+				'15 - FORRO DA MELHOR 03 Forro 2018 - os melhores do ano 1. SÓ INICIO DA 2.aac',
+				'81 - FORRO DA MELHOR 02 FORRO 2023 - 81.aac',
+				'falando de amor FimSemana.aac',
+				'falando de amor.aac',
+				'forro da melhor fds.aac',
+				'love songs.aac',
+				'pressao forrozeira.aac',
+				'toca tudo2 FimSemana.aac',
+				'toca tudo2.aac',
+                '01 - CHEGA JUNTO - 72 2 H 10 M.aac',
+                '00 - CHEGA JUNTO - PREFIXO COMERAIL PONTE LOC  LISTA ATE 72 A 75 RESTANTE 2 H 16 M.aac',
+                '00 - CHEGA JUNTO - PREFIXO COMERAIL PONTE LOC  LISTA ATE 75 A FINAL.aac',
+                '00 - ELETRONICA BRITO - ELETRONICA BRITO CARIMBO 01.aac'
+            ];
             
-                navigator.mediaSession.setActionHandler('play', () => {
-                    if (audio) {
-                        audio.play();
-                        isPlaying = true;
-                        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                        navigator.mediaSession.playbackState = 'playing';
-                    }
-                });
+            const audio = new Audio();
+            const playBtn = document.getElementById('playBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const status = document.querySelector('.status');
+            const albumArt = document.querySelector('.album-art');
+            const leds = document.querySelectorAll('.led');
             
-                navigator.mediaSession.setActionHandler('pause', () => {
-                    if (audio) {
-                        audio.pause();
-                        isPlaying = false;
-                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                        navigator.mediaSession.playbackState = 'paused';
-                    }
-                });
+            let isPlaying = false;
+            let currentTrackIndex = -1;
+            let playedTracks = new Set();
             
-                navigator.mediaSession.setActionHandler('previoustrack', () => {
-                    prevSong();
-                });
-            
-                navigator.mediaSession.setActionHandler('nexttrack', () => {
-                    nextSong();
-                });
-            }
-        };
-
-        const playSong = (index) => {
-            if (index < 0 || index >= playlist.length) {
-                return;
-            }
-
-            if (audio) {
-                audio.pause();
-                if (source) source.disconnect();
-            }
-
-            currentSongIndex = index;
-            const song = playlist[currentSongIndex];
-            
-            audio = new Audio(song.src);
-            audio.crossOrigin = "anonymous";
+            // Configuração inicial
             audio.volume = volumeSlider.value;
             
-            source = audioCtx.createMediaElementSource(audio);
-            source.connect(analyser);
-            analyser.connect(audioCtx.destination);
+            // Função para tocar uma música aleatória
+            function playRandomTrack() {
+                // Se todas as músicas foram tocadas, reinicia
+                if (playedTracks.size >= audioFiles.length) {
+                    playedTracks.clear();
+                }
+                
+                // Gera um índice aleatório que ainda não foi tocado
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * audioFiles.length);
+                } while (playedTracks.has(randomIndex));
+                
+                playedTracks.add(randomIndex);
+                currentTrackIndex = randomIndex;
+                
+                // Define a fonte do áudio
+                audio.src = audioFiles[currentTrackIndex];
+                status.textContent = 'Tocando...';
+                
+                // Toca o áudio
+                audio.play()
+                    .then(() => {
+                        isPlaying = true;
+                        playBtn.textContent = '❚❚';
+                        albumArt.classList.add('play');
+                    })
+                    .catch(error => {
+                        console.error('Erro ao reproduzir áudio:', error);
+                        status.textContent = 'Erro ao reproduzir';
+                    });
+            }
             
-            songTitleDisplay.textContent = song.name;
-            audio.play();
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            isPlaying = true;
-            
-            audio.onended = () => {
-                nextSong();
-            };
-
-            updateMediaSession(song);
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'playing';
-            }
-        };
-
-        const nextSong = () => {
-            if (isRepeating) {
-                playSong(currentSongIndex);
-                return;
-            }
-            let nextIndex;
-            if (isShuffling) {
-                const shuffledIndex = shuffledPlaylist.indexOf(currentSongIndex);
-                nextIndex = shuffledIndex + 1;
-                if (nextIndex >= shuffledPlaylist.length) {
-                    shuffledPlaylist = shuffleArray([...Array(playlist.length).keys()]);
-                    nextIndex = 0;
-                }
-                playSong(shuffledPlaylist[nextIndex]);
-            } else {
-                nextIndex = currentSongIndex + 1;
-                if (nextIndex >= playlist.length) {
-                    nextIndex = 0;
-                }
-                playSong(nextIndex);
-            }
-        };
-
-        const prevSong = () => {
-            let prevIndex;
-            if (isShuffling) {
-                const shuffledIndex = shuffledPlaylist.indexOf(currentSongIndex);
-                prevIndex = shuffledIndex - 1;
-                if (prevIndex < 0) {
-                    prevIndex = shuffledPlaylist.length - 1;
-                }
-                playSong(shuffledPlaylist[prevIndex]);
-            } else {
-                prevIndex = currentSongIndex - 1;
-                if (prevIndex < 0) {
-                    prevIndex = playlist.length - 1;
-                }
-                playSong(prevIndex);
-            }
-        };
-
-        const shuffleArray = (array) => {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        };
-
-        playPauseBtn.addEventListener('click', () => {
-            initializeAudioContext();
-            if (isPlaying) {
-                audio.pause();
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                if ('mediaSession' in navigator) { navigator.mediaSession.playbackState = 'paused'; }
-            } else {
-                if (!audio) {
-                    playSong(0);
+            // Event listener para o botão play/pause
+            playBtn.addEventListener('click', function() {
+                if (isPlaying) {
+                    audio.pause();
+                    playBtn.textContent = '▶';
+                    status.textContent = 'Pausado';
+                    albumArt.classList.remove('play');
+                    isPlaying = false;
                 } else {
-                    if (audioCtx.state === 'suspended') {
-                        audioCtx.resume();
+                    if (currentTrackIndex === -1) {
+                        // Primeira reprodução
+                        playRandomTrack();
+                    } else {
+                        // Continua a reprodução
+                        audio.play()
+                            .then(() => {
+                                playBtn.textContent = '❚❚';
+                                status.textContent = 'Tocando...';
+                                albumArt.classList.add('play');
+                                isPlaying = true;
+                            });
                     }
-                    audio.play();
                 }
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                if ('mediaSession' in navigator) { navigator.mediaSession.playbackState = 'playing'; }
+            });
+            
+            // Event listener para o controle de volume
+            volumeSlider.addEventListener('input', function() {
+                audio.volume = volumeSlider.value;
+            });
+            
+            // Event listener para quando o áudio terminar
+            audio.addEventListener('ended', function() {
+                playRandomTrack();
+            });
+            
+            // Simulação de LED VU meter
+            function updateVUMeter() {
+                // Simulação aleatória para demonstração
+                const levels = [];
+                for (let i = 0; i < leds.length; i++) {
+                    // Gera valores aleatórios para simular o VU meter
+                    const value = isPlaying ? Math.random() * 10 : 0;
+                    levels.push(value);
+                }
+                
+                // Atualiza as cores dos LEDs com base nos níveis
+                leds.forEach((led, index) => {
+                    const level = levels[index];
+                    
+                    if (level > 8) {
+                        led.style.backgroundColor = '#ff0000';
+                        led.style.height = '30px';
+                    } else if (level > 6) {
+                        led.style.backgroundColor = '#ff5500';
+                        led.style.height = '25px';
+                    } else if (level > 4) {
+                        led.style.backgroundColor = '#ffff00';
+                        led.style.height = '20px';
+                    } else if (level > 2) {
+                        led.style.backgroundColor = '#00ff00';
+                        led.style.height = '15px';
+                    } else if (level > 0) {
+                        led.style.backgroundColor = '#0066ff';
+                        led.style.height = '10px';
+                    } else {
+                        led.style.backgroundColor = '#333';
+                        led.style.height = '5px';
+                    }
+                });
+                
+                // Continua a animação
+                if (isPlaying) {
+                    requestAnimationFrame(updateVUMeter);
+                }
             }
-            isPlaying = !isPlaying;
-        });
-
-        nextBtn.addEventListener('click', nextSong);
-        prevBtn.addEventListener('click', prevSong);
-        
-        shuffleBtn.addEventListener('click', () => {
-            isShuffling = !isShuffling;
-            shuffleBtn.classList.toggle('active', isShuffling);
-            if (isShuffling) {
-                isRepeating = false;
-                repeatBtn.classList.remove('active');
-            }
-        });
-        
-        repeatBtn.addEventListener('click', () => {
-            isRepeating = !isRepeating;
-            repeatBtn.classList.toggle('active', isRepeating);
-            if (isRepeating) {
-                isShuffling = false;
-                shuffleBtn.classList.remove('active');
-            }
-        });
-
-        volumeSlider.addEventListener('input', (e) => {
-            if (audio) {
-                audio.volume = e.target.value;
-            }
-        });
-        
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && isPlaying && audio) {
-                // Não faz nada, a Media Session API vai manter o áudio tocando
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            shuffledPlaylist = shuffleArray([...Array(playlist.length).keys()]);
-            shuffleBtn.classList.add('active');
+            
+            // Inicia a animação do VU meter quando começa a tocar
+            audio.addEventListener('play', function() {
+                updateVUMeter();
+            });
         });
     </script>
 </body>
 </html>
-
-
 
 
 
